@@ -39,7 +39,6 @@ a-scene{position:fixed;inset:0;z-index:0}
 @keyframes flip{0%{opacity:0;transform:translateY(-12px)}15%{opacity:1;transform:none}85%{opacity:1;transform:none}100%{opacity:0;transform:translateY(12px)}}
 @keyframes glow{0%,100%{border-color:var(--brd)}50%{border-color:rgba(0,229,255,.55)}}
 @keyframes haloOut{0%{transform:scale(.3);opacity:.9}100%{transform:scale(2.4);opacity:0}}
-@keyframes mapPing{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
 
 .scan-line{position:absolute;left:0;right:0;height:2px;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(0,229,255,.05),transparent);animation:scan 7s linear infinite;z-index:1}
 .corner{position:absolute;width:16px;height:16px;pointer-events:none}
@@ -236,11 +235,6 @@ a-scene{position:fixed;inset:0;z-index:0}
 .hud-cross::before{width:2px;height:100%;left:50%;transform:translateX(-50%)}
 .hud-cross::after{width:100%;height:2px;top:50%;transform:translateY(-50%)}
 
-/* MINIMAP */
-#minimap{position:absolute;top:max(env(safe-area-inset-top),52px);right:clamp(10px,2vw,18px);width:clamp(100px,18vw,140px);height:clamp(100px,18vw,140px);z-index:310;pointer-events:none;display:none}
-#minimap canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:10px;border:1px solid rgba(0,229,255,.22);background:rgba(5,7,9,.82)}
-.minimap-ping{position:absolute;top:50%;left:50%;width:10px;height:10px;margin:-5px;border-radius:50%;border:2px solid var(--c0);animation:mapPing 1.5s ease-out infinite}
-
 /* WAIT BANNER */
 #waitBanner{position:absolute;top:max(env(safe-area-inset-top),52px);left:50%;transform:translateX(-50%);z-index:320;display:none;background:rgba(5,7,9,.9);border:1px solid rgba(255,204,68,.4);border-radius:50px;padding:8px 20px;font-family:var(--fn);font-size:.68rem;font-weight:700;color:var(--c2);letter-spacing:.1em;animation:pulse 2s ease-in-out infinite;pointer-events:none;white-space:nowrap;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 
@@ -267,6 +261,7 @@ a-scene{position:fixed;inset:0;z-index:0}
 .win-title{font-family:var(--fn);font-size:clamp(1.7rem,4.8vw,2.5rem);font-weight:900;color:var(--c2);text-shadow:0 0 28px rgba(255,204,68,.4);animation:shimmer 3s ease-in-out infinite}
 .win-name{font-family:var(--fn);font-size:1.02rem;font-weight:700;color:var(--c0);letter-spacing:.08em}
 .win-sub{font-family:var(--fm);font-size:.65rem;color:var(--tx3)}
+.win-time{font-family:var(--fn);font-size:.78rem;font-weight:700;color:var(--tx2);letter-spacing:.08em}
 #toast{position:absolute;bottom:clamp(22px,4.5vw,36px);left:50%;transform:translateX(-50%);background:var(--glass);border:1px solid var(--brd2);border-radius:50px;color:var(--tx);font-family:var(--fm);font-size:.66rem;padding:9px 22px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 22px rgba(0,0,0,.45);z-index:999}
 #toast.show{opacity:1}
 </style>
@@ -309,16 +304,44 @@ a-scene{position:fixed;inset:0;z-index:0}
     <a-entity id="decorLights"></a-entity>
     <a-entity id="otherPlayers"></a-entity>
 
-    <!-- EXIT PORTAL -->
+    <!-- EXIT PORTAL — Arcane gate -->
     <a-entity id="exitPortal" visible="false" position="0 0 0">
-      <a-cylinder radius="1.1" height=".09" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:1.4;transparent:true;opacity:.92" animation="property:rotation;to:0 360 0;loop:true;dur:2600;easing:linear"></a-cylinder>
-      <a-ring radius-inner=".96" radius-outer="1.36" rotation="-90 0 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:.9;transparent:true;opacity:.6;side:double" animation="property:scale;from:1 1 1;to:1.11 1.11 1;loop:true;dir:alternate;dur:680"></a-ring>
-      <a-cylinder radius=".09" height="3.2" position="-.76 1.6 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:2.2;transparent:true;opacity:.82" animation="property:material.emissiveIntensity;from:1.6;to:3.2;loop:true;dir:alternate;dur:520"></a-cylinder>
-      <a-cylinder radius=".09" height="3.2" position=".76 1.6 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:2.2;transparent:true;opacity:.82" animation="property:material.emissiveIntensity;from:1.6;to:3.2;loop:true;dir:alternate;dur:650"></a-cylinder>
-      <a-torus radius=".76" radius-tubular=".07" arc="180" position="0 3.2 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:2.5;transparent:true;opacity:.88"></a-torus>
-      <a-dodecahedron radius=".26" position="0 1.9 0" material="color:#aaffcc;emissive:#44ffaa;emissiveIntensity:3.5;transparent:true;opacity:.96" animation__r="property:rotation;to:0 360 0;loop:true;dur:1900;easing:linear" animation__b="property:position;from:0 1.8 0;to:0 2.2 0;loop:true;dir:alternate;dur:880"></a-dodecahedron>
-      <a-entity light="type:point;color:#44ffaa;intensity:7;distance:22;decay:2"></a-entity>
-      <a-text value="SALIDA" align="center" position="0 3.9 0" color="#44ffaa" width="6" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+      <!-- Ground seal: two counter-rotating discs -->
+      <a-cylinder radius="1.4" height=".06" material="color:#44ffaa;emissive:#00ff88;emissiveIntensity:1.6;transparent:true;opacity:.88" animation="property:rotation;from:0 0 0;to:0 360 0;loop:true;dur:3000;easing:linear"></a-cylinder>
+      <a-cylinder radius="1.0" height=".08" material="color:#88ffcc;emissive:#44ffaa;emissiveIntensity:2;transparent:true;opacity:.7" animation="property:rotation;from:0 0 0;to:0 -360 0;loop:true;dur:2000;easing:linear"></a-cylinder>
+      <a-cylinder radius=".5" height=".1" material="color:#ccffee;emissive:#88ffcc;emissiveIntensity:3;transparent:true;opacity:.6" animation="property:rotation;from:0 0 0;to:0 360 0;loop:true;dur:1200;easing:linear"></a-cylinder>
+      <!-- Outer ground ring -->
+      <a-ring radius-inner="1.3" radius-outer="1.6" rotation="-90 0 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:1.2;transparent:true;opacity:.55;side:double" animation="property:scale;from:1 1 1;to:1.08 1.08 1;loop:true;dir:alternate;dur:600"></a-ring>
+      <!-- Two main stone pillars -->
+      <a-cylinder radius=".12" height="3.4" position="-.9 1.7 0" material="src:#texWall2;repeat:1 2;roughness:.88"></a-cylinder>
+      <a-cylinder radius=".12" height="3.4" position=".9 1.7 0" material="src:#texWall2;repeat:1 2;roughness:.88"></a-cylinder>
+      <!-- Glowing pillar cores -->
+      <a-cylinder radius=".07" height="3.2" position="-.9 1.6 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:2.8;transparent:true;opacity:.7" animation="property:material.emissiveIntensity;from:2;to:4;loop:true;dir:alternate;dur:500"></a-cylinder>
+      <a-cylinder radius=".07" height="3.2" position=".9 1.6 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:2.8;transparent:true;opacity:.7" animation="property:material.emissiveIntensity;from:2;to:4;loop:true;dir:alternate;dur:620"></a-cylinder>
+      <!-- Orbs on top of pillars -->
+      <a-sphere radius=".2" position="-.9 3.5 0" material="color:#ccffee;emissive:#44ffaa;emissiveIntensity:4.5;transparent:true;opacity:.95" animation="property:scale;from:1 1 1;to:1.4 1.4 1.4;loop:true;dir:alternate;dur:550"></a-sphere>
+      <a-sphere radius=".2" position=".9 3.5 0" material="color:#ccffee;emissive:#44ffaa;emissiveIntensity:4.5;transparent:true;opacity:.95" animation="property:scale;from:1 1 1;to:1.4 1.4 1.4;loop:true;dir:alternate;dur:680"></a-sphere>
+      <!-- Arch over the top -->
+      <a-torus radius=".9" radius-tubular=".08" arc="180" position="0 3.4 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:3;transparent:true;opacity:.9"></a-torus>
+      <!-- Inner portal plane: shimmering energy field -->
+      <a-plane width="1.62" height="3.2" position="0 1.6 0" material="color:#44ffaa;emissive:#44ffaa;emissiveIntensity:.5;transparent:true;opacity:.14;side:double" animation="property:material.opacity;from:.08;to:.22;loop:true;dir:alternate;dur:800"></a-plane>
+      <!-- Central floating gem: icosahedron -->
+      <a-icosahedron radius=".28" position="0 1.9 0" material="color:#ccffee;emissive:#44ffaa;emissiveIntensity:4;transparent:true;opacity:.96" animation__r="property:rotation;from:0 0 0;to:360 360 0;loop:true;dur:2200;easing:linear" animation__b="property:position;from:0 1.7 0;to:0 2.1 0;loop:true;dir:alternate;dur:950"></a-icosahedron>
+      <!-- Secondary orbiting gems -->
+      <a-entity animation="property:rotation;from:0 0 0;to:0 360 0;loop:true;dur:1800;easing:linear">
+        <a-sphere radius=".08" position=".6 1.9 0" material="color:#aaffcc;emissive:#44ffaa;emissiveIntensity:5;transparent:true;opacity:.9"></a-sphere>
+        <a-sphere radius=".08" position="-.6 1.9 0" material="color:#aaffcc;emissive:#44ffaa;emissiveIntensity:5;transparent:true;opacity:.9"></a-sphere>
+      </a-entity>
+      <a-entity animation="property:rotation;from:0 0 0;to:0 -360 0;loop:true;dur:2600;easing:linear">
+        <a-sphere radius=".06" position=".8 1.2 0" material="color:#88ffcc;emissive:#44ffaa;emissiveIntensity:5;transparent:true;opacity:.8"></a-sphere>
+        <a-sphere radius=".06" position="-.8 2.6 0" material="color:#88ffcc;emissive:#44ffaa;emissiveIntensity:5;transparent:true;opacity:.8"></a-sphere>
+      </a-entity>
+      <!-- Strong light sources -->
+      <a-entity light="type:point;color:#44ffaa;intensity:8;distance:24;decay:2"></a-entity>
+      <a-entity light="type:point;color:#88ffdd;intensity:4;distance:12;decay:2" position="0 2 0"></a-entity>
+      <!-- SALIDA text -->
+      <a-text value="SALIDA" align="center" position="0 4.2 0" color="#44ffaa" width="7" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+      <a-text value="EXIT" align="center" position="0 3.82 0" color="rgba(68,255,170,.45)" width="3.5" font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
     </a-entity>
 
     <!-- PLAYER RIG -->
@@ -348,9 +371,9 @@ a-scene{position:fixed;inset:0;z-index:0}
       <div class="ld-sub">EXPLORA . COMPITE . ESCAPA</div>
     </div>
     <div class="ld-cards">
-      <div class="lc"><span class="lc-icon">&#x1F5B1;</span><div><div class="lc-title">Raton + Teclado</div><div class="lc-body">Clic para capturar cursor. <b>WASD</b> mover. <b>P</b> pausa.</div></div></div>
+      <div class="lc"><span class="lc-icon">&#x1F5B1;</span><div><div class="lc-title">Rat&oacute;n + Teclado</div><div class="lc-body">Clic para capturar cursor. <b>WASD</b> mover. <b>P</b> pausa.</div></div></div>
       <div class="lc"><span class="lc-icon">&#x1F3AE;</span><div><div class="lc-title">Mando</div><div class="lc-body">Stick <b>izq</b> mover, <b>der</b> mirar. Cualquier mando.</div></div></div>
-      <div class="lc"><span class="lc-icon">&#x1F97D;</span><div><div class="lc-title">Gafas VR</div><div class="lc-body">Boton <b>VR</b> abajo a la derecha. <b>30 segundos</b>.</div></div></div>
+      <div class="lc"><span class="lc-icon">&#x1F97D;</span><div><div class="lc-title">Gafas VR</div><div class="lc-body">Bot&oacute;n <b>VR</b> abajo a la derecha. <b>30 segundos</b>.</div></div></div>
       <div class="lc"><span class="lc-icon">&#x1F3C6;</span><div><div class="lc-title">Objetivo</div><div class="lc-body">Encuentra el <b>portal verde</b>. Laberinto compartido.</div></div></div>
     </div>
   </div>
@@ -370,7 +393,7 @@ a-scene{position:fixed;inset:0;z-index:0}
   <div class="sn-box">
     <div class="sn-eyebrow">// Identificacion</div>
     <div class="sn-title">Tu nombre</div>
-    <div class="sn-sub">Aparecera para otros jugadores.</div>
+    <div class="sn-sub">Aparecer&aacute; para otros jugadores.</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><label class="f-label" style="margin:0">Nombre</label><span class="sn-cnt" id="snCnt" style="font-family:var(--fm);font-size:.57rem;color:var(--c0)">0/10</span></div>
     <div class="sn-wrap" style="margin-top:0;margin-bottom:16px">
       <input class="sn-in" id="snIn" type="text" maxlength="10" placeholder="JUGADOR01"
@@ -378,7 +401,7 @@ a-scene{position:fixed;inset:0;z-index:0}
         onkeydown="if(event.key==='Enter')goToMenu()"/>
       <div class="sn-dot"></div>
     </div>
-    <button class="btn-cta" onclick="goToMenu()">Entrar al menu</button>
+    <button class="btn-cta" onclick="goToMenu()">Entrar al men&uacute;</button>
   </div>
 </div>
 
@@ -388,7 +411,7 @@ a-scene{position:fixed;inset:0;z-index:0}
     <div class="m-head">
       <div class="m-top-row">
         <div><div class="m-logo">LABY<span>RINTH</span></div><div class="m-tagline">// Escapa antes que los demas</div></div>
-        <div class="m-badge">VR</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="m-badge">VR</div><div style="font-family:var(--fm);font-size:.48rem;color:var(--tx3);letter-spacing:.12em">v0.4.0 alpha</div></div>
       </div>
     </div>
     <div class="m-sep"></div>
@@ -397,36 +420,37 @@ a-scene{position:fixed;inset:0;z-index:0}
       <div class="sub on" id="mMain">
         <button class="nav-item" onclick="goSub('mPlay')"><div class="nav-ico">&#x25BA;</div><div><span class="nav-title">Jugar</span><span class="nav-sub">Solo, hostear o unirse</span></div><span class="nav-arr">&#x203A;</span></button>
         <button class="nav-item" onclick="goSub('mSettings')"><div class="nav-ico">&#x2699;</div><div><span class="nav-title">Ajustes</span><span class="nav-sub">Audio, controles, nombre</span></div><span class="nav-arr">&#x203A;</span></button>
-        <button class="nav-item" onclick="goSub('mCredits')"><div class="nav-ico">&#x2139;</div><div><span class="nav-title">Info</span><span class="nav-sub">Tecnologias y creditos</span></div><span class="nav-arr">&#x203A;</span></button>
+        <button class="nav-item" id="shopBtn" onclick="openShop()"><div class="nav-ico" id="shopIco">&#x1F6CD;</div><div><span class="nav-title">Tienda <span id="shopSoon" style="font-family:var(--fm);font-size:.55rem;color:var(--tx3);letter-spacing:.08em;font-weight:400">Pr&oacute;ximamente</span></span><span class="nav-sub" id="shopSubText">Gana una partida para desbloquear</span></div><span class="nav-arr">&#x203A;</span></button>
+        <button class="nav-item" onclick="goSub('mCredits')"><div class="nav-ico">&#x2606;</div><div><span class="nav-title">Cr&eacute;ditos</span><span class="nav-sub">Equipo y tecnolog&iacute;as</span></div><span class="nav-arr">&#x203A;</span></button>
       </div>
 
       <div class="sub" id="mPlay">
         <div class="sub-label">Modo de juego</div>
         <div class="f-grp">
-          <label class="f-label">Tamano del laberinto</label>
+          <label class="f-label">Tama&ntilde;o del laberinto</label>
           <div class="t-row" id="msRow">
             <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=25">Normal</button>
             <button class="t-btn on" onclick="tE('msRow',this);MAZE_SIZE=35">Grande</button>
             <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=45">Epico</button>
           </div>
         </div>
-        <button class="mode-item" onclick="startSolo()"><span class="mode-ico">&#x25B7;</span><div><span class="mode-title">Solo</span><span class="mode-sub">Explora y escapa sin competicion</span></div><span class="mode-arr">&#x203A;</span></button>
+        <button class="mode-item" onclick="startSolo()"><span class="mode-ico">&#x25B7;</span><div><span class="mode-title">Solo</span><span class="mode-sub">Explora y escapa sin competici&oacute;n</span></div><span class="mode-arr">&#x203A;</span></button>
         <button class="mode-item" onclick="goSub('mHost')"><span class="mode-ico">&#x25A1;</span><div><span class="mode-title">Crear sala</span><span class="mode-sub">Se el anfitrion</span></div><span class="mode-arr">&#x203A;</span></button>
-        <button class="mode-item" onclick="goSub('mJoin')"><span class="mode-ico">&#x2192;</span><div><span class="mode-title">Unirse</span><span class="mode-sub">Entra con codigo</span></div><span class="mode-arr">&#x203A;</span></button>
+        <button class="mode-item" onclick="goSub('mJoin')"><span class="mode-ico">&#x2192;</span><div><span class="mode-title">Unirse</span><span class="mode-sub">Entra con c&oacute;digo</span></div><span class="mode-arr">&#x203A;</span></button>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
       </div>
 
       <div class="sub" id="mHost">
         <div class="sub-label">Crear sala</div>
-        <div class="f-grp"><label class="f-label">Max. jugadores</label><div class="n-row"><button class="n-btn" onclick="adjP(-1)">-</button><span class="n-val" id="maxPD">4</span><button class="n-btn" onclick="adjP(1)">+</button></div></div>
-        <div id="hostCodeArea" style="display:none"><label class="f-label" style="margin-bottom:8px">Codigo de sala</label><div class="code-disp" id="hostCodeBox">------</div></div>
+        <div class="f-grp"><label class="f-label">M&aacute;x. jugadores</label><div class="n-row"><button class="n-btn" onclick="adjP(-1)">-</button><span class="n-val" id="maxPD">4</span><button class="n-btn" onclick="adjP(1)">+</button></div></div>
+        <div id="hostCodeArea" style="display:none"><label class="f-label" style="margin-bottom:8px">C&oacute;digo de sala</label><div class="code-disp" id="hostCodeBox">------</div></div>
         <button class="btn-cta" id="btnCreateRoom" onclick="createRoom()">Crear sala</button>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mPlay')">Volver</button></div>
       </div>
 
       <div class="sub" id="mJoin">
         <div class="sub-label">Unirse a sala</div>
-        <div class="f-grp"><label class="f-label">Codigo (6 caracteres)</label><input class="code-field" id="jCode" maxlength="6" placeholder="ABC123" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/></div>
+        <div class="f-grp"><label class="f-label">C&oacute;digo (6 car&aacute;cteres)</label><input class="code-field" id="jCode" maxlength="6" placeholder="ABC123" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/></div>
         <button class="btn-cta" style="margin-top:4px" onclick="doJoin()">Unirse</button>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mPlay')">Volver</button></div>
       </div>
@@ -435,13 +459,13 @@ a-scene{position:fixed;inset:0;z-index:0}
         <div class="sec-lbl">Cuenta</div>
         <div class="s-item"><div class="s-item-head" style="margin-bottom:6px"><span class="s-item-label">Nombre</span></div><div class="name-wrap"><input class="name-in" id="nameIn" type="text" maxlength="10" placeholder="JUGADOR01" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,'');syncName(this.value)"/></div></div>
         <div class="sec-lbl">Audio</div>
-        <div class="s-item"><div class="s-item-head"><span class="s-item-label">Musica menu</span></div><div class="t-row" id="musicRow"><button class="t-btn on" onclick="tE('musicRow',this);setMenuMusic(true)">Activada</button><button class="t-btn" onclick="tE('musicRow',this);setMenuMusic(false)">Silencio</button></div></div>
-        <div class="s-item"><div class="s-item-head"><span class="s-item-label">Sonidos juego</span></div><div class="t-row" id="sfxRow"><button class="t-btn on" onclick="tE('sfxRow',this);SFX_ON=true">Activados</button><button class="t-btn" onclick="tE('sfxRow',this);SFX_ON=false">Silencio</button></div></div>
-        <div class="sec-lbl">Graficos</div>
+        <div class="s-item"><div class="s-item-head"><span class="s-item-label">M&uacute;sica men&uacute;</span></div><div class="t-row" id="musicRow"><button class="t-btn on" onclick="tE('musicRow',this);setMenuMusic(true)">Activada</button><button class="t-btn" onclick="tE('musicRow',this);setMenuMusic(false)">Silencio</button></div></div>
+        <div class="s-item"><div class="s-item-head"><span class="s-item-label">Sonidos del juego</span></div><div class="t-row" id="sfxRow"><button class="t-btn on" onclick="tE('sfxRow',this);SFX_ON=true">Activados</button><button class="t-btn" onclick="tE('sfxRow',this);SFX_ON=false">Silencio</button></div></div>
+        <div class="sec-lbl">Gr&aacute;ficos</div>
         <div class="s-item"><div class="s-item-head"><span class="s-item-label">Niebla</span></div><div class="t-row" id="fogRow"><button class="t-btn on" onclick="tE('fogRow',this);setFog(true)">Activada</button><button class="t-btn" onclick="tE('fogRow',this);setFog(false)">Desactivada</button></div></div>
         <div class="sec-lbl">Controles</div>
         <div class="s-item" id="ctrlDesktop">
-          <span class="s-item-label">Teclado y raton</span>
+          <span class="s-item-label">Teclado y rat&oacute;n</span>
           <div class="ctrl-desc"><span class="ctrl-key">WASD</span> Mover &nbsp; <span class="ctrl-key">RATON</span> Mirar &nbsp; <span class="ctrl-key">P</span> Pausa<br><span class="ctrl-key">CLIC</span> Capturar cursor &nbsp; <span class="ctrl-key">ESC</span> Soltar</div>
         </div>
         <div class="s-item">
@@ -449,7 +473,7 @@ a-scene{position:fixed;inset:0;z-index:0}
           <div class="ctrl-desc"><span class="ctrl-key" style="color:var(--c3)">L-STICK</span> Mover &nbsp; <span class="ctrl-key" style="color:var(--c3)">R-STICK</span> Mirar &nbsp; <span class="ctrl-key" style="color:var(--c3)">START</span> Pausa</div>
         </div>
         <div class="s-item" id="ctrlMobile" style="display:none">
-          <span class="s-item-label">Tactil / Movil</span>
+          <span class="s-item-label">T&aacute;ctil / M&oacute;vil</span>
           <div class="ctrl-desc"><span class="ctrl-key" style="color:var(--c2)">JOYSTICK</span> Mover &nbsp; <span class="ctrl-key" style="color:var(--c2)">ARRASTRA</span> Mirar</div>
         </div>
         <div class="s-item">
@@ -462,8 +486,25 @@ a-scene{position:fixed;inset:0;z-index:0}
       </div>
 
       <div class="sub" id="mCredits">
-        <div class="sub-label">Info</div>
-        <div class="f-note" style="line-height:2.2">Motor 3D: <b>A-Frame 1.5</b><br>Multijugador P2P: <b>PeerJS 1.5</b><br>Fuentes: <b>Orbitron + Share Tech Mono</b><br>Laberinto: <b>Prim con bucles</b><br>Sala de spawn: <b>Habitacion abierta 7x7</b><br>Arco de entrada: <b>Dos pilares + dintel</b><br>Compatible: <b>WebXR, Gamepad, Pointer Lock, Touch</b></div>
+        <div class="sub-label">Cr&eacute;ditos</div>
+        <div class="f-note" style="line-height:2.3;margin-bottom:0">
+          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">VERSION</span><br>
+          Labyrinth VR &nbsp; <b>v0.4.0</b> &nbsp; <span style="color:var(--tx3);font-size:.55rem">alpha</span><br>
+          <br>
+          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">EQUIPO</span><br>
+          <b>IES POLITECNIC &mdash; SMX1</b><br>
+          <br>
+          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">TECNOLOGIA</span><br>
+          Motor 3D: <b>A-Frame 1.5</b><br>
+          Multijugador: <b>PeerJS 1.5</b><br>
+          Fuentes: <b>Orbitron + Share Tech Mono</b><br>
+          Laberinto: <b>Prim aleatorizado + bucles</b><br>
+          Audio: <b>Web Audio API</b><br>
+          Compatible: <b>WebXR, Gamepad, Touch, VR</b>
+        </div>
+        <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:11px 14px;font-family:var(--fm);font-size:.6rem;color:var(--tx3);line-height:1.8">
+          Pr&oacute;ximamente: modo historia, cosm&eacute;ticos, bicho perseguidor, tienda, estelas de jugador.
+        </div>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
       </div>
 
@@ -477,9 +518,9 @@ a-scene{position:fixed;inset:0;z-index:0}
   <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
   <div class="wait-box">
     <div class="wait-ey">// Sala de espera</div>
-    <div class="wait-title" id="waitTitle">Esperando jugadores...</div>
-    <div class="wait-sub" id="waitSub">La partida empieza cuando el host lo indique.</div>
-    <div style="font-family:var(--fm);font-size:.52rem;letter-spacing:.22em;color:var(--tx3);text-transform:uppercase;margin-bottom:8px">Codigo de sala</div>
+    <div class="wait-title" id="waitTitle">Esperando jugadores…</div>
+    <div class="wait-sub" id="waitSub">La partida empieza cuando el anfitri&oacute;n lo indique.</div>
+    <div style="font-family:var(--fm);font-size:.52rem;letter-spacing:.22em;color:var(--tx3);text-transform:uppercase;margin-bottom:8px">C&oacute;digo de sala</div>
     <div class="code-disp" id="waitCodeBox" style="margin-bottom:16px">------</div>
     <div class="wait-players" id="waitPlayers"></div>
     <div class="wait-spin" id="waitSpin"></div>
@@ -493,13 +534,13 @@ a-scene{position:fixed;inset:0;z-index:0}
   <div class="vr-bg"></div><div class="scan-line"></div>
   <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
   <div class="vr-halos"><div class="vr-halo"></div><div class="vr-halo"></div><div class="vr-halo"></div><div class="vr-core">VR</div></div>
-  <div class="vr-ey">// Preparacion VR</div>
-  <div class="vr-title">Ponte las gafas</div>
+  <div class="vr-ey">// Preparaci&oacute;n VR</div>
+  <div class="vr-title">P&oacute;nte las gafas</div>
   <div class="vr-sub">Laberinto listo. Tienes <b id="vrSubSec">30</b> segundos.</div>
   <div class="vr-rule"></div>
   <div class="vr-steps">
-    <div class="vr-step" id="vrS1"><span class="vs-ico">VR</span>Ponte las gafas<span class="vs-chk">ok</span></div>
-    <div class="vr-step" id="vrS2"><span class="vs-ico">*</span>Ajusta la posicion<span class="vs-chk">ok</span></div>
+    <div class="vr-step" id="vrS1"><span class="vs-ico">VR</span>P&oacute;nte las gafas<span class="vs-chk">ok</span></div>
+    <div class="vr-step" id="vrS2"><span class="vs-ico">*</span>Ajusta la posici&oacute;n<span class="vs-chk">ok</span></div>
     <div class="vr-step" id="vrS3"><span class="vs-ico">+</span>Listo<span class="vs-chk">ok</span></div>
   </div>
   <div class="vr-num-wrap"><div class="vr-num" id="vrNum">30</div><div class="vr-num-lbl">segundos</div></div>
@@ -520,11 +561,8 @@ a-scene{position:fixed;inset:0;z-index:0}
 <!-- JOYSTICK -->
 <div id="vjoy"><div class="vj-base" id="vjBase"><div class="vj-stick" id="vjStick"></div></div></div>
 
-<!-- MINIMAP -->
-<div id="minimap"><canvas id="mmCanvas"></canvas><div class="minimap-ping"></div></div>
-
 <!-- WAIT BANNER (in-game) -->
-<div id="waitBanner">Esperando jugadores...</div>
+<div id="waitBanner">Esperando jugadores…</div>
 
 <!-- HUD -->
 <div id="hud">
@@ -552,10 +590,13 @@ a-scene{position:fixed;inset:0;z-index:0}
 <div id="sWin">
   <div class="win-card">
     <div class="win-trophy">&#x1F3C6;</div>
-    <div class="win-title">Escapo!</div>
+    <div style="font-family:var(--fm);font-size:.58rem;letter-spacing:.4em;color:var(--c3);text-transform:uppercase;opacity:.8">// PORTAL CRUZADO</div>
+    <div class="win-title" id="winTitle">VICTORIA</div>
     <div class="win-name" id="winN"></div>
+    <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--c3),transparent);margin:2px 0"></div>
     <div class="win-sub" id="winSub"></div>
-    <button class="btn-cta" style="margin-top:10px" onclick="location.reload()">Menu principal</button>
+    <div id="winTime" style="font-family:var(--fn);font-size:.78rem;font-weight:700;color:var(--tx2);letter-spacing:.08em;display:none"></div>
+    <button class="btn-cta" style="margin-top:12px;background:var(--c3);color:#050709" onclick="location.reload()">Men&uacute; principal</button>
   </div>
 </div>
 
@@ -575,6 +616,23 @@ function setFog(on){$('scene').setAttribute('fog',on?'type:exponential;color:#0a
 
 var isMobile=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
 if(isMobile){var cp=$('ctrlDesktop');if(cp)cp.style.display='none';var cm=$('ctrlMobile');if(cm)cm.style.display='flex';}
+
+/* Version & wins tracking */
+var GAME_VERSION='v0.4.0';
+var _wins=+(localStorage.getItem('lbWins')||0);
+
+/* Shop unlock */
+function openShop(){
+  if(_wins<1){toast('Gana una partida para desbloquear la tienda');return;}
+  toast('Tienda pr&oacute;xima — vuelve pronto');
+}
+/* Update shop button state on load */
+(function(){
+  var sb=$('shopBtn'),ss=$('shopSoon'),st=$('shopSubText');
+  if(_wins>=1&&sb&&ss&&st){
+    ss.style.display='none';st.textContent='Pr&oacute;ximamente disponible';
+  }
+})();
 
 var playerName=localStorage.getItem('lbName')||'JUGADOR01';
 if($('snIn'))$('snIn').value=playerName;
@@ -738,7 +796,7 @@ function injectTextures(){
 /* ================================================
    LOADING
 ================================================ */
-var STEPS=[{p:10,t:'Iniciando A-Frame...'},{p:25,t:'Generando laberinto...'},{p:45,t:'Aplicando texturas...'},{p:65,t:'Construyendo mundo...'},{p:82,t:'Luces y decoracion...'},{p:95,t:'Controles VR...'},{p:100,t:'Listo!'}];
+var STEPS=[{p:10,t:'Iniciando A-Frame…'},{p:25,t:'Generando laberinto…'},{p:45,t:'Aplicando texturas…'},{p:65,t:'Construyendo mundo…'},{p:82,t:'Luces y decoraci&oacute;n…'},{p:95,t:'Controles VR…'},{p:100,t:'Listo'}];
 var sc=$('ldSteps');
 STEPS.forEach(function(_,i){var d=document.createElement('div');d.className='ld-step';d.id='ldS'+i;sc.appendChild(d);});
 var lsi=0;
@@ -1032,63 +1090,24 @@ function buildSpawnRoom(con){
 }
 
 function buildEntrance(con){
-  /* INICIO golden portal at spawn room centre */
+  /* Subtle floor marker at spawn centre — no big blinding light */
   var p=wp(5,5);
   var g=mk('a-entity',{position:p.x+' 0 '+p.z});
-  var disc=mk('a-cylinder',{radius:'1.4',height:'0.1',material:'color:#ffcc44;emissive:#ffaa00;emissiveIntensity:1.4;transparent:true;opacity:.9'});
-  disc.setAttribute('animation','property:rotation;to:0 360 0;loop:true;dur:5200;easing:linear');g.appendChild(disc);
-  var ring=mk('a-ring',{'radius-inner':'1.3','radius-outer':'1.72',rotation:'-90 0 0',material:'color:#ffdd55;emissive:#ffcc00;emissiveIntensity:1;transparent:true;opacity:.58;side:double'});
-  ring.setAttribute('animation','property:scale;from:1 1 1;to:1.1 1.1 1;loop:true;dir:alternate;dur:820');g.appendChild(ring);
-  [[-1.12,-1.12],[1.12,-1.12],[-1.12,1.12],[1.12,1.12]].forEach(function(off,idx){
-    var pil=mk('a-cylinder',{radius:'0.085',height:String(WH),position:off[0]+' '+(WH/2)+' '+off[1],material:'color:#ffcc44;emissive:#ffaa00;emissiveIntensity:1.8;transparent:true;opacity:.84'});
-    pil.setAttribute('animation','property:material.emissiveIntensity;from:1.4;to:3;loop:true;dir:alternate;dur:'+(580+idx*120));g.appendChild(pil);
-    var orb=mk('a-sphere',{radius:'0.16',position:off[0]+' '+WH+' '+off[1],material:'color:#ffee88;emissive:#ffcc44;emissiveIntensity:3.8;transparent:true;opacity:.92'});
-    orb.setAttribute('animation','property:scale;from:1 1 1;to:1.38 1.38 1.38;loop:true;dir:alternate;dur:'+(540+idx*75));g.appendChild(orb);
-  });
-  g.appendChild(mk('a-entity',{light:'type:point;color:#ffcc44;intensity:6;distance:22;decay:1.6'}));
-  g.appendChild(mk('a-text',{value:'INICIO',align:'center',position:'0 '+(WH+0.95)+' 0',color:'#ffdd44',width:'8',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'}));
+  /* Small glowing floor disc */
+  var disc=mk('a-cylinder',{radius:'0.9',height:'0.06',material:'color:#ffcc44;emissive:#ffaa00;emissiveIntensity:0.8;transparent:true;opacity:.7'});
+  disc.setAttribute('animation','property:rotation;to:0 360 0;loop:true;dur:6000;easing:linear');
+  g.appendChild(disc);
+  /* Soft inner ring */
+  var ring=mk('a-ring',{'radius-inner':'0.82','radius-outer':'1.05',rotation:'-90 0 0',material:'color:#ffdd55;emissive:#ffcc00;emissiveIntensity:0.6;transparent:true;opacity:.4;side:double'});
+  g.appendChild(ring);
+  /* INICIO text floating just above floor — small and unobtrusive */
+  g.appendChild(mk('a-text',{value:'INICIO',align:'center',position:'0 0.35 0',color:'rgba(255,204,68,.65)',width:'5',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'}));
   con.appendChild(g);
 }
 
 /* ================================================
    MINIMAP
-================================================ */
-var _mm={canvas:null,ctx:null,active:false};
-function initMinimap(){
-  _mm.canvas=$('mmCanvas');
-  _mm.ctx=_mm.canvas.getContext('2d');
-  _mm.canvas.width=140;_mm.canvas.height=140;
-  _mm.active=true;
-  $('minimap').style.display='block';
-}
-function drawMinimap(){
-  if(!_mm.active||!_mm.ctx)return;
-  var ctx=_mm.ctx;var W=_mm.canvas.width,H2=_mm.canvas.height;
-  ctx.clearRect(0,0,W,H2);
-  /* background */
-  ctx.fillStyle='rgba(5,7,9,.85)';ctx.fillRect(0,0,W,H2);
-  /* maze cells */
-  var cw=W/MC,ch=H2/MR;
-  for(var r=0;r<MR;r++)for(var c=0;c<MC;c++){
-    if(G[r][c]){ctx.fillStyle='rgba(180,140,80,.28)';ctx.fillRect(c*cw,r*ch,cw,ch);}
-  }
-  /* exit */
-  var ec=findExitCell();if(ec){ctx.fillStyle='rgba(68,255,170,.8)';ctx.fillRect(ec.c*cw-1,ec.r*ch-1,cw+2,ch+2);}
-  /* player */
-  var hW2=MC*CELL/2,hD=MR*CELL/2;
-  var pr=Math.round((pos.z+hD-CELL/2)/CELL);var pc=Math.round((pos.x+hW2-CELL/2)/CELL);
-  ctx.fillStyle='#00e5ff';ctx.beginPath();ctx.arc((pc+0.5)*cw,(pr+0.5)*ch,3,0,Math.PI*2);ctx.fill();
-  /* other players */
-  Object.keys(_others).forEach(function(id){
-    var op=_othersPos[id];if(!op)return;
-    var or2=Math.round((op.z+hD-CELL/2)/CELL);var oc=Math.round((op.x+hW2-CELL/2)/CELL);
-    ctx.fillStyle='#ff9933';ctx.beginPath();ctx.arc((oc+0.5)*cw,(or2+0.5)*ch,2.5,0,Math.PI*2);ctx.fill();
-  });
-  /* border */
-  ctx.strokeStyle='rgba(0,229,255,.22)';ctx.lineWidth=1;ctx.strokeRect(0,0,W,H2);
-}
 var _exitCell=null;
-function findExitCell(){if(_exitCell)return _exitCell;_exitCell=findExit();return _exitCell;}
 
 /* ================================================
    CONFIG & STATE
@@ -1119,20 +1138,21 @@ function createRoom(){
   syncName(nm);roomCode=genCode();_mazeSeed=Date.now()&0x7fffffff;
   $('hostCodeBox').textContent=roomCode;$('hostCodeArea').style.display='block';$('btnCreateRoom').style.display='none';
   waitPlayers=[{id:'host',name:playerName,isHost:true}];gameRole='host';
-  peer=new Peer('LBY_'+roomCode,{debug:0});
-  peer.on('open',function(){toast('Sala: '+roomCode);});
+  /* Use PeerJS public cloud with STUN for better crossplay */
+  peer=new Peer('LBY_'+roomCode,{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+  peer.on('open',function(){toast('Sala creada: '+roomCode);});
   peer.on('connection',function(conn){
     conn.on('open',function(){guestConns[conn.peer]=conn;
       conn.on('data',function(d){onHostData(conn,d);});
       conn.on('close',function(){delete guestConns[conn.peer];waitPlayers=waitPlayers.filter(function(p){return p.id!==conn.peer;});renderWait();broadcastH({type:'player_leave',id:conn.peer});removeOther(conn.peer);});
     });
   });
-  peer.on('error',function(e){toast('PeerJS: '+e.type);});
+  peer.on('error',function(e){toast('Error de sala: '+e.type,5000);});
   setTimeout(function(){$('sMenu').classList.add('hidden');showWait();},400);
 }
 
 function onHostData(conn,d){
-  if(d.type==='join'){waitPlayers.push({id:conn.peer,name:d.name});renderWait();conn.send({type:'welcome',players:waitPlayers,maxPlayers:maxPlayers,seed:_mazeSeed});broadcastH({type:'player_join',id:conn.peer,name:d.name},conn.peer);toast(d.name+' se unio');if(waitPlayers.length>=maxPlayers)hostStartGame();}
+  if(d.type==='join'){waitPlayers.push({id:conn.peer,name:d.name});renderWait();conn.send({type:'welcome',players:waitPlayers,maxPlayers:maxPlayers,seed:_mazeSeed,mazeSize:MAZE_SIZE});broadcastH({type:'player_join',id:conn.peer,name:d.name},conn.peer);toast(d.name+' se uni&oacute;');if(waitPlayers.length>=maxPlayers)hostStartGame();}
   if(d.type==='move'&&gameStarted){broadcastH({type:'move',id:conn.peer,pos:d.pos},conn.peer);updateOther(conn.peer,d.pos);}
   if(d.type==='ready'){_readyCount++;checkAllReady();}
   if(d.type==='win'){broadcastH({type:'win',name:d.name});triggerWin(d.name,false);}
@@ -1142,27 +1162,28 @@ function hostStartGame(){$('btnStart').style.display='none';broadcastH({type:'st
 
 function doJoin(){
   var nm=($('snIn').value||$('nameIn').value||playerName).trim().toUpperCase()||'JUGADOR01';syncName(nm);
-  var code=$('jCode').value.trim().toUpperCase();if(code.length<4){toast('Introduce el codigo');return;}
+  var code=$('jCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length!==6){toast('El c&oacute;digo debe tener exactamente 6 car&aacute;cteres',4000);return;}
   roomCode=code;gameRole='guest';
-  peer=new Peer({debug:0});
+  peer=new Peer({debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
   peer.on('open',function(){
-    hostConn=peer.connect('LBY_'+code,{reliable:true});
-    hostConn.on('open',function(){hostConn.send({type:'join',name:playerName});toast('Conectado');$('sMenu').classList.add('hidden');showWait();});
+    hostConn=peer.connect('LBY_'+code,{reliable:true,serialization:'json'});
+    hostConn.on('open',function(){hostConn.send({type:'join',name:playerName});toast('Conectado a sala '+code);$('sMenu').classList.add('hidden');showWait();});
     hostConn.on('data',function(d){onGuestData(d);});
-    hostConn.on('close',function(){if(!gameStarted)toast('Conexion perdida');});
+    hostConn.on('close',function(){if(!gameStarted)toast('Conexi&oacute;n perdida — verifica el c&oacute;digo',4000);});
   });
-  peer.on('error',function(e){toast('Error: '+e.type);});
+  peer.on('error',function(e){toast('No se pudo conectar: '+e.type,5000);});
 }
 function onGuestData(d){
-  if(d.type==='welcome'){waitPlayers=d.players||[];maxPlayers=d.maxPlayers||4;if(d.seed)_mazeSeed=d.seed;renderWait();}
-  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name});renderWait();toast(d.name+' se unio');}
+  if(d.type==='welcome'){waitPlayers=d.players||[];maxPlayers=d.maxPlayers||4;if(d.seed)_mazeSeed=d.seed;if(d.mazeSize)MAZE_SIZE=d.mazeSize;renderWait();}
+  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name});renderWait();toast(d.name+' se uni&oacute;');}
   if(d.type==='player_leave'){waitPlayers=waitPlayers.filter(function(p){return p.id!==d.id;});renderWait();removeOther(d.id);}
   if(d.type==='start'){MAZE_SIZE=d.mazeSize||MAZE_SIZE;if(d.seed)_mazeSeed=d.seed;gameStarted=true;launchGame();}
   if(d.type==='move')updateOther(d.id,d.pos);
   if(d.type==='all_ready'){_canMove=true;hideBanner();}
   if(d.type==='win')triggerWin(d.name,false);
 }
-function showWait(){$('sWait').style.display='flex';$('waitCodeBox').textContent=roomCode;$('waitTitle').textContent=gameRole==='host'?'Tu sala esta lista':'Sala encontrada';$('waitSub').textContent=gameRole==='host'?'Comparte el codigo. Pulsa Comenzar.':'Esperando al anfitrion...';if(gameRole==='host')$('btnStart').style.display='flex';renderWait();}
+function showWait(){$('sWait').style.display='flex';$('waitCodeBox').textContent=roomCode;$('waitTitle').textContent=gameRole==='host'?'Tu sala esta lista':'Sala encontrada';$('waitSub').textContent=gameRole==='host'?'Comparte el c&oacute;digo. Pulsa Comenzar.':'Esperando al anfitri&oacute;n…';if(gameRole==='host')$('btnStart').style.display='flex';renderWait();}
 function renderWait(){var list=$('waitPlayers');list.innerHTML='';waitPlayers.forEach(function(p,i){var row=document.createElement('div');row.className='wait-player';row.innerHTML='<div class="wp-dot'+(i===0?' host':'')+'"></div><span class="wp-name">'+p.name+'</span><span class="wp-tag">'+(i===0?'HOST':'JUGADOR')+'</span>';list.appendChild(row);});$('waitCnt').textContent=waitPlayers.length+' / '+maxPlayers+' conectados';}
 function leaveRoom(){try{if(peer)peer.destroy();}catch(e){}peer=null;hostConn=null;guestConns={};$('sWait').style.display='none';$('sMenu').classList.remove('hidden');goSub('mPlay');$('btnCreateRoom').style.display='flex';$('hostCodeArea').style.display='none';}
 
@@ -1206,20 +1227,20 @@ function finishVR(){var sv=$('sVR');sv.style.opacity='0';sv.style.transition='op
 function showBuildScreen(finalCb){
   var ov=document.createElement('div');
   ov.id='sBuild';ov.style.cssText='position:fixed;inset:0;z-index:850;background:#050709;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;';
-  ov.innerHTML='<div style="font-family:var(--fn);font-size:clamp(1rem,2.8vw,1.6rem);font-weight:900;color:var(--tx);animation:shimmer 3s ease-in-out infinite;letter-spacing:.08em">Generando laberinto...</div>'
+  ov.innerHTML='<div style="font-family:var(--fn);font-size:clamp(1rem,2.8vw,1.6rem);font-weight:900;color:var(--tx);animation:shimmer 3s ease-in-out infinite;letter-spacing:.08em">Generando laberinto…</div>'
     +'<div style="width:min(280px,75vw);height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div id="bldBar" style="height:100%;width:4%;background:linear-gradient(90deg,#ff6600,#ffcc44);transition:width .4s;border-radius:2px"></div></div>'
-    +'<div id="bldLbl" style="font-family:var(--fm);font-size:.6rem;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase">Preparando...</div>';
+    +'<div id="bldLbl" style="font-family:var(--fm);font-size:.6rem;color:var(--tx3);letter-spacing:.15em;text-transform:uppercase">Preparando…</div>';
   document.body.appendChild(ov);
   function setBld(pct,lbl){var b=$('bldBar'),l=$('bldLbl');if(b)b.style.width=pct+'%';if(l)l.textContent=lbl;}
 
   setBld(8,'Construyendo maze...');
   setTimeout(function(){
-    setBld(30,'Paredes...');
+    setBld(30,'Paredes…');
     buildWalls(function(){
-      setBld(65,'Decoracion y luces...');
+      setBld(65,'Decoraci&oacute;n y luces…');
       setTimeout(function(){
         buildDecorations(function(){
-          setBld(100,'Listo!');
+          setBld(100,'Listo');
           setTimeout(function(){
             ov.style.opacity='0';ov.style.transition='opacity .5s';
             setTimeout(function(){ov.remove();finalCb();},520);
@@ -1238,7 +1259,7 @@ function startSolo(){var nm=($('snIn').value||$('nameIn').value||playerName).tri
 function launchGame(){
   gameStarted=true;stopMenuMusic();
   $('sMenu').classList.add('hidden');$('sWait').style.display='none';clearTimeout(_shotT);
-  won=false;gameOn=false;
+  won=false;gameOn=false;_gameStartTime=0;
   $('hud').style.display='block';$('hudN').textContent=playerName;
   $('hudPC').textContent=gameRole==='solo'?'Solo':waitPlayers.length+' jugadores';
 
@@ -1254,18 +1275,21 @@ function launchGame(){
     $('menuScene').setAttribute('visible','false');
     $('gameScene').setAttribute('visible','true');
     setFog(true);
-    initMinimap();
-
-    /* Detect VR */
-    $('scene').addEventListener('enter-vr',function(){_inVR=true;_vrAutoFwd=true;});
-    $('scene').addEventListener('exit-vr',function(){_inVR=false;_vrAutoFwd=false;});
+    /* VR detection: hide 2D overlays, enable look-to-move */
+    $('scene').addEventListener('enter-vr',function(){
+      _inVR=true;_vrAutoFwd=true;
+      if(isMobile)$('vjoy').style.display='none';
+    });
+    $('scene').addEventListener('exit-vr',function(){
+      _inVR=false;_vrAutoFwd=false;
+      if(isMobile)$('vjoy').style.display='block';
+    });
 
     showVRCountdown(function(){
-      gameOn=true;
+      gameOn=true;_gameStartTime=Date.now();
       if(isMobile){$('vjoy').style.display='block';initVJoy();}
       else showClickOverlay();
       pollGP();
-      setInterval(drawMinimap,80);
     });
   });
 }
@@ -1357,6 +1381,7 @@ function applyGPLook(dt){
 /* ================================================
    EXIT CHECK
 ================================================ */
+var _gameStartTime=0;
 function checkExit(){
   if(won)return;
   var ddx=pos.x-exitX,ddz=pos.z-exitZ;
@@ -1370,8 +1395,17 @@ function checkExit(){
 }
 function triggerWin(name,isMe){
   if($('sWin').style.display==='flex')return;
-  $('winN').textContent=name;$('winSub').textContent=isMe?'Has escapado del laberinto!':'Llego a la salida primero.';
-  $('sWin').style.display='flex';$('hud').style.display='none';$('vjoy').style.display='none';$('minimap').style.display='none';
+  if(isMe){
+    _wins++;localStorage.setItem('lbWins',_wins);
+    var ss=$('shopSoon'),st=$('shopSubText');
+    if(ss)ss.style.display='none';if(st)st.textContent='Pr&oacute;ximamente disponible';
+  }
+  var title=$('winTitle'),nameEl=$('winN'),sub=$('winSub'),tEl=$('winTime');
+  if(title){title.textContent=isMe?'VICTORIA':'DERROTA';title.style.color=isMe?'var(--c2)':'var(--c1)';}
+  if(nameEl)nameEl.textContent=name;
+  if(sub)sub.textContent=isMe?'Has cruzado el portal de salida':'Cruz&oacute; el portal primero';
+  if(tEl&&_gameStartTime>0){var el=Math.floor((Date.now()-_gameStartTime)/1000);var mm=Math.floor(el/60),ss2=el%60;tEl.textContent='Tiempo: '+(mm>0?mm+'m ':'')+ss2+'s';tEl.style.display='block';}
+  $('sWin').style.display='flex';$('hud').style.display='none';$('vjoy').style.display='none';$('waitBanner').style.display='none';
 }
 
 /* ================================================
@@ -1384,28 +1418,104 @@ function broadcastMove(){
   if(gameRole==='guest'&&hostConn&&hostConn.open)try{hostConn.send(msg);}catch(e){}
   if(gameRole==='host')broadcastH({type:'move',id:'host',pos:msg.pos});
 }
+/* Assign a colour per player slot for variety */
+var _playerColors=['#00e5ff','#ff6b35','#a855f7','#22d3ee','#f97316','#4ade80','#f43f5e','#facc15'];
+var _playerIdx=0;
+
 var _others={},_othersPos={};
 function updateOther(id,p){
   _othersPos[id]={x:p.x,z:p.z};
   if(!_others[id]){
+    var col=_playerColors[_playerIdx%_playerColors.length];_playerIdx++;
     var e=mk('a-entity',{position:p.x+' 0 '+p.z});
-    /* Player sprite: capsule body (cylinder) + head (sphere) with emissive cyan */
-    var body=mk('a-cylinder',{radius:'0.22',height:'1.4',position:'0 0.7 0',material:'color:#1a3a4a;emissive:#006688;emissiveIntensity:.8;roughness:.7;metalness:.1'});
-    e.appendChild(body);
-    var head=mk('a-sphere',{radius:'0.2',position:'0 1.62 0',material:'color:#2a5a6a;emissive:#00aacc;emissiveIntensity:1;roughness:.5'});
-    e.appendChild(head);
-    /* Thin directional indicator */
-    e.appendChild(mk('a-box',{width:'0.06',height:'0.06',depth:'0.28',position:'0 1.5 -0.22',material:'color:#00e5ff;emissive:#00e5ff;emissiveIntensity:2.5'}));
-    /* Name tag */
-    var nm=playerName;for(var ii=0;ii<waitPlayers.length;ii++){if(waitPlayers[ii].id===id){nm=waitPlayers[ii].name;break;}}
-    e.appendChild(mk('a-text',{value:nm,align:'center',position:'0 2.1 0',color:'#00e5ff',width:'2.8',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'}));
-    /* subtle glow */
-    e.appendChild(mk('a-entity',{light:'type:point;color:#00e5ff;intensity:.6;distance:4'}));
-    $('otherPlayers').appendChild(e);_others[id]=e;
+
+    /* === TORSO === */
+    e.appendChild(mk('a-box',{
+      width:'0.38',height:'0.52',depth:'0.22',position:'0 1.1 0',
+      material:'color:#1a2a3a;emissive:'+col+';emissiveIntensity:.25;roughness:.6;metalness:.15'
+    }));
+    /* Chest stripe */
+    e.appendChild(mk('a-box',{
+      width:'0.1',height:'0.48',depth:'0.23',position:'0 1.1 0',
+      material:'color:'+col+';emissive:'+col+';emissiveIntensity:.8;roughness:.4;metalness:.1'
+    }));
+
+    /* === HEAD === */
+    e.appendChild(mk('a-box',{
+      width:'0.28',height:'0.28',depth:'0.26',position:'0 1.52 0',
+      material:'color:#0e1a24;emissive:'+col+';emissiveIntensity:.15;roughness:.5;metalness:.2'
+    }));
+    /* Visor */
+    e.appendChild(mk('a-box',{
+      width:'0.22',height:'0.1',depth:'0.27',position:'0 1.54 0',
+      material:'color:'+col+';emissive:'+col+';emissiveIntensity:2.5;transparent:true;opacity:.82;roughness:.1;metalness:.4'
+    }));
+    /* Visor glow line */
+    e.appendChild(mk('a-box',{
+      width:'0.24',height:'0.02',depth:'0.27',position:'0 1.54 0',
+      material:'color:#ffffff;emissive:#ffffff;emissiveIntensity:3;transparent:true;opacity:.6'
+    }));
+
+    /* === ARMS === */
+    /* Left arm */
+    e.appendChild(mk('a-box',{
+      width:'0.1',height:'0.44',depth:'0.12',position:'-0.25 1.08 0',
+      material:'color:#162030;emissive:'+col+';emissiveIntensity:.18;roughness:.65'
+    }));
+    /* Right arm */
+    e.appendChild(mk('a-box',{
+      width:'0.1',height:'0.44',depth:'0.12',position:'0.25 1.08 0',
+      material:'color:#162030;emissive:'+col+';emissiveIntensity:.18;roughness:.65'
+    }));
+
+    /* === LEGS === */
+    e.appendChild(mk('a-box',{
+      width:'0.14',height:'0.46',depth:'0.14',position:'-0.1 0.58 0',
+      material:'color:#0e1620;emissive:'+col+';emissiveIntensity:.1;roughness:.7'
+    }));
+    e.appendChild(mk('a-box',{
+      width:'0.14',height:'0.46',depth:'0.14',position:'0.1 0.58 0',
+      material:'color:#0e1620;emissive:'+col+';emissiveIntensity:.1;roughness:.7'
+    }));
+    /* Boots */
+    e.appendChild(mk('a-box',{
+      width:'0.16',height:'0.1',depth:'0.18',position:'-0.1 0.32 0.02',
+      material:'color:#0a1016;emissive:'+col+';emissiveIntensity:.2;roughness:.5;metalness:.2'
+    }));
+    e.appendChild(mk('a-box',{
+      width:'0.16',height:'0.1',depth:'0.18',position:'0.1 0.32 0.02',
+      material:'color:#0a1016;emissive:'+col+';emissiveIntensity:.2;roughness:.5;metalness:.2'
+    }));
+
+    /* === NAME TAG === */
+    var nm='???';
+    for(var ii=0;ii<waitPlayers.length;ii++){if(waitPlayers[ii].id===id){nm=waitPlayers[ii].name;break;}}
+    /* Background pill */
+    e.appendChild(mk('a-plane',{
+      width:'0.7',height:'0.18',position:'0 1.96 0',
+      material:'color:#050709;emissive:'+col+';emissiveIntensity:.12;transparent:true;opacity:.75;side:double'
+    }));
+    e.appendChild(mk('a-text',{
+      value:nm,align:'center',position:'0 1.96 0.01',
+      color:col,width:'2.4',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'
+    }));
+
+    /* === GLOW LIGHT === */
+    e.appendChild(mk('a-entity',{
+      light:'type:point;color:'+col+';intensity:.7;distance:3.5;decay:2'
+    }));
+
+    $('otherPlayers').appendChild(e);
+    _others[id]=e;
   }
   _others[id].setAttribute('position',p.x+' 0 '+p.z);
 }
-function removeOther(id){if(_others[id]){if(_others[id].parentNode)_others[id].parentNode.removeChild(_others[id]);delete _others[id];delete _othersPos[id];}}
+function removeOther(id){
+  if(_others[id]){
+    if(_others[id].parentNode)_others[id].parentNode.removeChild(_others[id]);
+    delete _others[id];delete _othersPos[id];
+  }
+}
 
 /* ================================================
    VIRTUAL JOYSTICK
