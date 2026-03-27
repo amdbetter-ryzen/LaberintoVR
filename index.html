@@ -265,6 +265,17 @@ a-scene{position:fixed;inset:0;z-index:0}
 #toast{position:absolute;bottom:clamp(22px,4.5vw,36px);left:50%;transform:translateX(-50%);background:var(--glass);border:1px solid var(--brd2);border-radius:50px;color:var(--tx);font-family:var(--fm);font-size:.66rem;padding:9px 22px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 22px rgba(0,0,0,.45);z-index:999}
 #toast.show{opacity:1}
 </style>
+<script>
+AFRAME.registerComponent('billboard',{
+  tick:function(){
+    var cam=document.querySelector('[camera]');
+    if(!cam)return;
+    var camPos=cam.object3D.getWorldPosition(new THREE.Vector3());
+    var objPos=this.el.object3D.getWorldPosition(new THREE.Vector3());
+    this.el.object3D.lookAt(camPos.x,objPos.y,camPos.z);
+  }
+});
+</script>
 </head>
 <body>
 
@@ -298,9 +309,9 @@ a-scene{position:fixed;inset:0;z-index:0}
     <a-plane id="gCeil" rotation="90 0 0" position="0 3.2 0" width="200" height="200" material="color:#040302;roughness:1;metalness:0"></a-plane>
     <a-entity id="mazeWalls"></a-entity>
     <!-- Ambient: enough to see in darkness, torches do the rest -->
-    <a-entity light="type:ambient;color:#1e1006;intensity:3.5"></a-entity>
+    <a-entity light="type:ambient;color:#1e1006;intensity:2.2"></a-entity>
     <!-- Hemisphere: warm from below, cool from above for depth -->
-    <a-entity light="type:hemisphere;color:#ff9944;groundColor:#0a1a28;intensity:1.2"></a-entity>
+    <a-entity light="type:hemisphere;color:#ff9944;groundColor:#0a1a28;intensity:0.5"></a-entity>
     <a-entity id="decorLights"></a-entity>
     <a-entity id="otherPlayers"></a-entity>
 
@@ -394,10 +405,10 @@ a-scene{position:fixed;inset:0;z-index:0}
     <div class="sn-eyebrow">// Identificacion</div>
     <div class="sn-title">Tu nombre</div>
     <div class="sn-sub">Aparecer&aacute; para otros jugadores.</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><label class="f-label" style="margin:0">Nombre</label><span class="sn-cnt" id="snCnt" style="font-family:var(--fm);font-size:.57rem;color:var(--c0)">0/10</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><label class="f-label" style="margin:0">Nombre</label><span class="sn-cnt" id="snCnt" style="font-family:var(--fm);font-size:.57rem;color:var(--c0)">0/16</span></div>
     <div class="sn-wrap" style="margin-top:0;margin-bottom:16px">
-      <input class="sn-in" id="snIn" type="text" maxlength="10" placeholder="JUGADOR01"
-        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,'');document.getElementById('snCnt').textContent=this.value.length+'/10'"
+      <input class="sn-in" id="snIn" type="text" maxlength="16" placeholder="JUGADOR01"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,'');document.getElementById('snCnt').textContent=this.value.length+'/16'"
         onkeydown="if(event.key==='Enter')goToMenu()"/>
       <div class="sn-dot"></div>
     </div>
@@ -420,22 +431,27 @@ a-scene{position:fixed;inset:0;z-index:0}
       <div class="sub on" id="mMain">
         <button class="nav-item" onclick="goSub('mPlay')"><div class="nav-ico">&#x25BA;</div><div><span class="nav-title">Jugar</span><span class="nav-sub">Solo, hostear o unirse</span></div><span class="nav-arr">&#x203A;</span></button>
         <button class="nav-item" onclick="goSub('mSettings')"><div class="nav-ico">&#x2699;</div><div><span class="nav-title">Ajustes</span><span class="nav-sub">Audio, controles, nombre</span></div><span class="nav-arr">&#x203A;</span></button>
-        <button class="nav-item" id="shopBtn" onclick="openShop()"><div class="nav-ico" id="shopIco">&#x1F6CD;</div><div><span class="nav-title">Tienda <span id="shopSoon" style="font-family:var(--fm);font-size:.55rem;color:var(--tx3);letter-spacing:.08em;font-weight:400">Pr&oacute;ximamente</span></span><span class="nav-sub" id="shopSubText">Gana una partida para desbloquear</span></div><span class="nav-arr">&#x203A;</span></button>
+        <button class="nav-item" id="shopBtn" onclick="openShop()"><div class="nav-ico" id="shopIco">&#x1F6CD;</div><div><span class="nav-title">Tienda <span id="shopSoon" style="font-family:var(--fm);font-size:.55rem;color:var(--c2);letter-spacing:.08em;font-weight:400">EN PROGRESO</span></span><span class="nav-sub" id="shopSubText">Gana victorias para desbloquear cosm&eacute;ticos</span></div><span class="nav-arr">&#x203A;</span></button>
         <button class="nav-item" onclick="goSub('mCredits')"><div class="nav-ico">&#x2606;</div><div><span class="nav-title">Cr&eacute;ditos</span><span class="nav-sub">Equipo y tecnolog&iacute;as</span></div><span class="nav-arr">&#x203A;</span></button>
       </div>
 
       <div class="sub" id="mPlay">
         <div class="sub-label">Modo de juego</div>
+        <div class="t-row" id="gameModeRow" style="margin-bottom:8px">
+          <button class="t-btn on" onclick="tE('gameModeRow',this);GAME_MODE='original';updateModeDesc()">Original</button>
+          <button class="t-btn" onclick="tE('gameModeRow',this);GAME_MODE='survival';updateModeDesc()">Supervivencia</button>
+        </div>
+        <div id="modeDesc" style="font-family:var(--fm);font-size:.58rem;color:var(--tx3);line-height:1.7;margin-bottom:8px;padding:8px 10px;background:var(--bg2);border-radius:8px;border:1px solid var(--brd)">Busca la salida antes que los dem&aacute;s.</div>
         <div class="f-grp">
           <label class="f-label">Tama&ntilde;o del laberinto</label>
           <div class="t-row" id="msRow">
-            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=25">Normal</button>
-            <button class="t-btn on" onclick="tE('msRow',this);MAZE_SIZE=35">Grande</button>
-            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=45">Epico</button>
+            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=19;updateMazeSizeDesc()">Normal <span style="font-size:.55rem;opacity:.6">19x19</span></button>
+            <button class="t-btn on" onclick="tE('msRow',this);MAZE_SIZE=29;updateMazeSizeDesc()">Grande <span style="font-size:.55rem;opacity:.6">29x29</span></button>
+            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=39;updateMazeSizeDesc()">Enorme <span style="font-size:.55rem;opacity:.6">39x39</span></button>
           </div>
         </div>
-        <button class="mode-item" onclick="startSolo()"><span class="mode-ico">&#x25B7;</span><div><span class="mode-title">Solo</span><span class="mode-sub">Explora y escapa sin competici&oacute;n</span></div><span class="mode-arr">&#x203A;</span></button>
-        <button class="mode-item" onclick="goSub('mHost')"><span class="mode-ico">&#x25A1;</span><div><span class="mode-title">Crear sala</span><span class="mode-sub">Se el anfitrion</span></div><span class="mode-arr">&#x203A;</span></button>
+        <button class="mode-item" onclick="startSolo()"><span class="mode-ico">&#x25B7;</span><div><span class="mode-title">Solo</span><span class="mode-sub">Explora sin competir</span></div><span class="mode-arr">&#x203A;</span></button>
+        <button class="mode-item" onclick="goSub('mHost')"><span class="mode-ico">&#x25A1;</span><div><span class="mode-title">Crear sala</span><span class="mode-sub">S&eacute; el anfitri&oacute;n</span></div><span class="mode-arr">&#x203A;</span></button>
         <button class="mode-item" onclick="goSub('mJoin')"><span class="mode-ico">&#x2192;</span><div><span class="mode-title">Unirse</span><span class="mode-sub">Entra con c&oacute;digo</span></div><span class="mode-arr">&#x203A;</span></button>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
       </div>
@@ -457,7 +473,7 @@ a-scene{position:fixed;inset:0;z-index:0}
 
       <div class="sub" id="mSettings">
         <div class="sec-lbl">Cuenta</div>
-        <div class="s-item"><div class="s-item-head" style="margin-bottom:6px"><span class="s-item-label">Nombre</span></div><div class="name-wrap"><input class="name-in" id="nameIn" type="text" maxlength="10" placeholder="JUGADOR01" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,'');syncName(this.value)"/></div></div>
+        <div class="s-item"><div class="s-item-head" style="margin-bottom:6px"><span class="s-item-label">Nombre</span></div><div class="name-wrap"><input class="name-in" id="nameIn" type="text" maxlength="16" placeholder="JUGADOR01" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_]/g,'');syncName(this.value)"/></div></div>
         <div class="sec-lbl">Audio</div>
         <div class="s-item"><div class="s-item-head"><span class="s-item-label">M&uacute;sica men&uacute;</span></div><div class="t-row" id="musicRow"><button class="t-btn on" onclick="tE('musicRow',this);setMenuMusic(true)">Activada</button><button class="t-btn" onclick="tE('musicRow',this);setMenuMusic(false)">Silencio</button></div></div>
         <div class="s-item"><div class="s-item-head"><span class="s-item-label">Sonidos del juego</span></div><div class="t-row" id="sfxRow"><button class="t-btn on" onclick="tE('sfxRow',this);SFX_ON=true">Activados</button><button class="t-btn" onclick="tE('sfxRow',this);SFX_ON=false">Silencio</button></div></div>
@@ -466,53 +482,52 @@ a-scene{position:fixed;inset:0;z-index:0}
         <div class="sec-lbl">Controles</div>
         <div class="s-item" id="ctrlDesktop">
           <span class="s-item-label">Teclado y rat&oacute;n</span>
-          <div class="ctrl-desc"><span class="ctrl-key">WASD</span> Mover &nbsp; <span class="ctrl-key">RATON</span> Mirar &nbsp; <span class="ctrl-key">P</span> Pausa<br><span class="ctrl-key">CLIC</span> Capturar cursor &nbsp; <span class="ctrl-key">ESC</span> Soltar</div>
+          <div class="ctrl-desc"><span class="ctrl-key">WASD</span> Mover &nbsp; <span class="ctrl-key">RAT&Oacute;N</span> Mirar &nbsp; <span class="ctrl-key">P</span> Pausa<br><span class="ctrl-key">CLIC</span> Capturar cursor &nbsp; <span class="ctrl-key">ESC</span> Soltar</div>
         </div>
         <div class="s-item">
-          <span class="s-item-label">Mando</span>
-          <div class="ctrl-desc"><span class="ctrl-key" style="color:var(--c3)">L-STICK</span> Mover &nbsp; <span class="ctrl-key" style="color:var(--c3)">R-STICK</span> Mirar &nbsp; <span class="ctrl-key" style="color:var(--c3)">START</span> Pausa</div>
+          <span class="s-item-label">Mando / VR</span>
+          <div class="ctrl-desc"><span class="ctrl-key" style="color:var(--c3)">L-STICK</span> Mover &nbsp; <span class="ctrl-key" style="color:var(--c3)">R-STICK</span> Mirar &nbsp; <span class="ctrl-key" style="color:var(--c3)">START</span> Pausa<br>En VR: mira con la cabeza para dirigirte. El mando solo avanza.</div>
         </div>
         <div class="s-item" id="ctrlMobile" style="display:none">
           <span class="s-item-label">T&aacute;ctil / M&oacute;vil</span>
           <div class="ctrl-desc"><span class="ctrl-key" style="color:var(--c2)">JOYSTICK</span> Mover &nbsp; <span class="ctrl-key" style="color:var(--c2)">ARRASTRA</span> Mirar</div>
         </div>
-        <div class="s-item">
-          <span class="s-item-label">Gafas VR</span>
-          <div class="ctrl-desc">Pulsa <span class="ctrl-key">VR</span> en esquina inf. derecha. En VR con mando: avance automatico si no hay input. Con mando fisico: control normal.</div>
-        </div>
-        <div class="sec-lbl">Movimiento</div>
-        <div class="s-item"><div class="s-item-head"><span class="s-item-label">Velocidad</span><span class="s-item-val" id="sSpV">5</span></div><input type="range" class="s-rng" id="sSpeed" min="2" max="9" value="5" oninput="sRng(this);CFG.speed=+this.value;document.getElementById('sSpV').textContent=this.value"/></div>
+        <div class="sec-lbl">C&aacute;mara (PC)</div>
+        <div class="s-item"><div class="s-item-head"><span class="s-item-label">Sensibilidad del rat&oacute;n</span><span class="s-item-val" id="sSpV">5</span></div><input type="range" class="s-rng" id="sSpeed" min="1" max="10" value="5" oninput="sRng(this);CFG.mouseSens=+this.value;document.getElementById('sSpV').textContent=this.value"/></div>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
       </div>
 
       <div class="sub" id="mCredits">
         <div class="sub-label">Cr&eacute;ditos</div>
         <div class="f-note" style="line-height:2.3;margin-bottom:0">
-          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">VERSION</span><br>
+          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">VERSI&Oacute;N</span><br>
           Labyrinth VR &nbsp; <b>v0.4.0</b> &nbsp; <span style="color:var(--tx3);font-size:.55rem">alpha</span><br>
           <br>
           <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">EQUIPO</span><br>
           <b>IES POLITECNIC &mdash; SMX1</b><br>
+          Creadores y colaboradores del proyecto<br>
           <br>
-          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">TECNOLOGIA</span><br>
+          <span style="color:var(--c0);font-size:.6rem;letter-spacing:.18em">TECNOLOG&Iacute;A</span><br>
           Motor 3D: <b>A-Frame 1.5</b><br>
-          Multijugador: <b>PeerJS 1.5</b><br>
+          Multijugador P2P: <b>PeerJS 1.5</b><br>
+          Servidor de se&ntilde;alizaci&oacute;n: <b>PeerJS Cloud (0.peerjs.com)</b><br>
           Fuentes: <b>Orbitron + Share Tech Mono</b><br>
-          Laberinto: <b>Prim aleatorizado + bucles</b><br>
           Audio: <b>Web Audio API</b><br>
-          Compatible: <b>WebXR, Gamepad, Touch, VR</b>
-        </div>
-        <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:11px 14px;font-family:var(--fm);font-size:.6rem;color:var(--tx3);line-height:1.8">
-          Pr&oacute;ximamente: modo historia, cosm&eacute;ticos, bicho perseguidor, tienda, estelas de jugador.
+          Compatible: <b>WebXR, Gamepad API, Pointer Lock, Touch</b>
         </div>
         <div class="f-nav"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
       </div>
 
-    </div>
-  </div>
-</div>
+      <div class="sub" id="mShop">
+        <div class="sub-label">Tienda &mdash; <span style="color:var(--c2);font-size:.55rem">EN PROGRESO</span></div>
+        <div style="font-family:var(--fm);font-size:.6rem;color:var(--tx3);line-height:1.8;margin-bottom:10px;padding:9px 12px;background:var(--bg2);border:1px solid rgba(255,204,68,.25);border-radius:9px">
+          La tienda est&aacute; en desarrollo. Los cosm&eacute;ticos son de prueba y ser&aacute;n sustituidos.
+        </div>
+        <div id="shopItems" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div class="f-nav" style="margin-top:10px"><button class="lnk-back" onclick="goSub('mMain')">Volver</button></div>
+      </div>
 
-<!-- WAIT -->
+
 <div id="sWait">
   <div class="ld-bg"></div><div class="scan-line"></div>
   <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
@@ -617,28 +632,64 @@ function setFog(on){$('scene').setAttribute('fog',on?'type:exponential;color:#0a
 var isMobile=('ontouchstart' in window)||(navigator.maxTouchPoints>0);
 if(isMobile){var cp=$('ctrlDesktop');if(cp)cp.style.display='none';var cm=$('ctrlMobile');if(cm)cm.style.display='flex';}
 
-/* Version & wins tracking */
 var GAME_VERSION='v0.4.0';
+var GAME_MODE='original';
 var _wins=+(localStorage.getItem('lbWins')||0);
+var _equippedHat=localStorage.getItem('lbHat')||'none';
+var _equippedTrail=localStorage.getItem('lbTrail')||'none';
 
-/* Shop unlock */
-function openShop(){
-  if(_wins<1){toast('Gana una partida para desbloquear la tienda');return;}
-  toast('Tienda pr&oacute;xima — vuelve pronto');
+function updateModeDesc(){
+  var el=$('modeDesc');if(!el)return;
+  el.innerHTML=GAME_MODE==='survival'
+    ?'Sobrevive al nextbot. Todos deben escapar juntos. (Nextbot próximamente con modelos reales)'
+    :'Busca la salida antes que los demás. Sin límite de tiempo.';
 }
-/* Update shop button state on load */
-(function(){
-  var sb=$('shopBtn'),ss=$('shopSoon'),st=$('shopSubText');
-  if(_wins>=1&&sb&&ss&&st){
-    ss.style.display='none';st.textContent='Pr&oacute;ximamente disponible';
-  }
-})();
+function updateMazeSizeDesc(){}
+
+var SHOP_ITEMS=[
+  {id:'hat_basic',name:'Sombrero Básico',desc:'Sombrero encima de la cabeza',type:'hat',cost:1,color:'#ffcc44'},
+  {id:'hat_wizard',name:'Sombrero de Mago',desc:'Cónico morado brillante',type:'hat',cost:3,color:'#a855f7'},
+  {id:'hat_crown',name:'Corona',desc:'Corona dorada de campeón',type:'hat',cost:5,color:'#ffd700'},
+  {id:'trail_fire',name:'Estela de Fuego',desc:'Rastro de llamas al correr',type:'trail',cost:2,color:'#ff6600'},
+  {id:'trail_ice',name:'Estela de Hielo',desc:'Cristales azules tras tus pasos',type:'trail',cost:3,color:'#00e5ff'},
+  {id:'trail_star',name:'Estela Estelar',desc:'Partículas doradas al moverte',type:'trail',cost:4,color:'#ffdd44'}
+];
+
+function openShop(){
+  goSub('mShop');
+  var cont=$('shopItems');if(!cont)return;
+  cont.innerHTML='';
+  SHOP_ITEMS.forEach(function(item){
+    var unlocked=_wins>=item.cost;
+    var equipped=(_equippedHat===item.id||_equippedTrail===item.id);
+    var div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--bg2);border:1px solid '+(equipped?'rgba(0,229,255,.5)':'var(--brd)')+';border-radius:10px;';
+    var dot=document.createElement('div');
+    dot.style.cssText='width:14px;height:14px;border-radius:50%;background:'+item.color+';flex-shrink:0;box-shadow:0 0 8px '+item.color;
+    div.appendChild(dot);
+    var info=document.createElement('div');info.style.flex='1';
+    info.innerHTML='<div style="font-family:var(--fn);font-size:.72rem;font-weight:700;color:'+(unlocked?'var(--tx)':'var(--tx3)')+'">'+item.name+'</div>'
+      +'<div style="font-family:var(--fm);font-size:.57rem;color:var(--tx3);margin-top:2px">'+item.desc+'</div>';
+    div.appendChild(info);
+    var btn=document.createElement('button');
+    btn.style.cssText='font-family:var(--fm);font-size:.6rem;padding:7px 12px;border-radius:7px;border:1px solid '+(unlocked?'var(--brd2)':'var(--brd)')+';background:'+(equipped?'var(--c0)':'transparent')+';color:'+(equipped?'#050709':(unlocked?'var(--tx)':'var(--tx3)'))+';cursor:'+(unlocked?'pointer':'default')+';transition:all .2s;white-space:nowrap;';
+    btn.textContent=equipped?'Equipado':unlocked?'Equipar':item.cost+' victorias';
+    if(unlocked&&!equipped){
+      (function(it){btn.onclick=function(){
+        if(it.type==='hat')_equippedHat=it.id;else _equippedTrail=it.id;
+        localStorage.setItem('lbHat',_equippedHat);localStorage.setItem('lbTrail',_equippedTrail);
+        toast('Cosmético equipado');openShop();
+      };})(item);
+    }
+    div.appendChild(btn);cont.appendChild(div);
+  });
+}
 
 var playerName=localStorage.getItem('lbName')||'JUGADOR01';
 if($('snIn'))$('snIn').value=playerName;
-if($('snCnt'))$('snCnt').textContent=playerName.length+'/10';
+if($('snCnt'))$('snCnt').textContent=playerName.length+'/16';
 if($('nameIn'))$('nameIn').value=playerName;
-function syncName(v){playerName=v||'JUGADOR01';var si=$('snIn'),ni=$('nameIn');if(si&&si!==document.activeElement)si.value=v;if(ni&&ni!==document.activeElement)ni.value=v;var sc=$('snCnt');if(sc)sc.textContent=v.length+'/10';$('hudN').textContent=playerName;localStorage.setItem('lbName',playerName);}
+function syncName(v){playerName=v||'JUGADOR01';var si=$('snIn'),ni=$('nameIn');if(si&&si!==document.activeElement)si.value=v;if(ni&&ni!==document.activeElement)ni.value=v;var sc=$('snCnt');if(sc)sc.textContent=v.length+'/16';$('hudN').textContent=playerName;localStorage.setItem('lbName',playerName);}
 if($('snIn'))$('snIn').addEventListener('input',function(){syncName(this.value);});
 if($('nameIn'))$('nameIn').addEventListener('input',function(){syncName(this.value);});
 
@@ -817,7 +868,7 @@ function goToMenu(){var nm=($('snIn').value||'').trim().toUpperCase()||'JUGADOR0
    Seed transmitted via PeerJS so all clients
    generate identical mazes.
 ================================================ */
-var MAZE_SIZE=35;
+var MAZE_SIZE=29;
 var G=[],MR=0,MC=0;
 var CELL=2.2,WH=3.2;
 var _mazeSeed=0;
@@ -1029,7 +1080,7 @@ function buildDecorations(cb){
     br.appendChild(fl);
     br.appendChild(mk('a-sphere',{radius:'0.038',position:'0 0.23 0',material:'color:#fffde0;emissive:#ffee88;emissiveIntensity:7.5;transparent:true;opacity:.76'}));
     dec.appendChild(br);
-    dec.appendChild(mk('a-entity',{light:'type:point;color:#ff7700;intensity:3;distance:10;decay:2',position:tx+' '+(ty+0.18)+' '+tz}));
+    dec.appendChild(mk('a-entity',{light:'type:point;color:#ff7700;intensity:2.2;distance:5.5;decay:2.5',position:tx+' '+(ty+0.18)+' '+tz}));
   }
 
   /* Big cylinders replacing wall corners */
@@ -1053,6 +1104,28 @@ function buildDecorations(cb){
     dec.appendChild(mk('a-cylinder',{radius:'0.14',height:String(WH),position:(np.x+ox).toFixed(2)+' '+(WH/2)+' '+(np.z+oz).toFixed(2),material:'src:#texWall2;repeat:1 1.8;roughness:.9'}));
   }
 
+  /* Decorative crates - placeholder for future box assets */
+  var crateNodes=[];
+  for(var cr=1;cr<MR-1;cr+=4)for(var cc=1;cc<MC-1;cc+=4)
+    if(G[cr][cc]&&(cr>11||cc>11)&&_prng01()<0.12)crateNodes.push({r:cr,c:cc});
+  crateNodes.slice(0,Math.min(crateNodes.length,18)).forEach(function(nd){
+    var cp=wp(nd.r,nd.c);
+    var ox=(_prng01()-.5)*CELL*0.3,oz=(_prng01()-.5)*CELL*0.3;
+    var sz=(0.35+_prng01()*0.2).toFixed(2);
+    dec.appendChild(mk('a-box',{
+      width:sz,height:sz,depth:sz,
+      position:(cp.x+ox).toFixed(2)+' '+(sz/2)+' '+(cp.z+oz).toFixed(2),
+      material:'src:#texWall2;repeat:1 1;roughness:.88;metalness:.08'
+    }));
+    /* Occasional stacked crate */
+    if(_prng01()<0.35){
+      dec.appendChild(mk('a-box',{
+        width:(+sz*0.85).toFixed(2),height:sz,depth:(+sz*0.85).toFixed(2),
+        position:(cp.x+ox).toFixed(2)+' '+(+sz*1.5).toFixed(2)+' '+(cp.z+oz).toFixed(2),
+        material:'src:#texWall2;repeat:1 1;roughness:.88;metalness:.08'
+      }));
+    }
+  });
   buildSpawnRoom(dec);
   buildEntrance(dec);
   if(cb)cb();
@@ -1075,7 +1148,7 @@ function buildSpawnRoom(con){
     var lfl=mk('a-sphere',{radius:'0.1',position:'0 -0.28 0',material:'color:#ffcc44;emissive:#ff8800;emissiveIntensity:4;transparent:true;opacity:.96'});
     lfl.setAttribute('animation','property:scale;from:1 1 1;to:1.22 1.42 1.22;loop:true;dir:alternate;dur:'+(295+Math.floor(_prng01()*180)));
     ent.appendChild(lfl);
-    ent.appendChild(mk('a-entity',{light:'type:point;color:'+lCol+';intensity:5;distance:22;decay:1.8',position:'0 -0.28 0'}));
+    ent.appendChild(mk('a-entity',{light:'type:point;color:'+lCol+';intensity:2.5;distance:10;decay:2.2',position:'0 -0.28 0'}));
     ent.setAttribute('animation__sw','property:rotation;from:0 0 -3;to:0 0 3;loop:true;dir:alternate;dur:'+(2000+Math.floor(_prng01()*800))+';easing:easeInOutSine');
     con.appendChild(ent);
   });
@@ -1086,7 +1159,7 @@ function buildSpawnRoom(con){
   con.appendChild(mk('a-cylinder',{radius:'0.34',height:String(WH),position:aRight.x+' '+(WH/2)+' '+aRight.z,material:'src:#texWall2;repeat:1.2 2;roughness:.9'}));
   con.appendChild(mk('a-box',{width:'0.55',height:'0.5',depth:String(CELL*4),position:aMid.x+' '+(WH-0.2)+' '+aMid.z,material:'src:#texWall2;repeat:1 0.8;roughness:.9'}));
   /* subtle greenish hint of maze beyond arch */
-  con.appendChild(mk('a-entity',{light:'type:point;color:#44ffaa;intensity:1.2;distance:8',position:aMid.x+' '+(WH*0.45)+' '+(aMid.z+CELL*1.2)}));
+  con.appendChild(mk('a-entity',{light:'type:point;color:#44ffaa;intensity:0.6;distance:4',position:aMid.x+' '+(WH*0.45)+' '+(aMid.z+CELL*1.2)}));
 }
 
 function buildEntrance(con){
@@ -1106,13 +1179,10 @@ function buildEntrance(con){
 }
 
 /* ================================================
-   MINIMAP
-var _exitCell=null;
-
-/* ================================================
    CONFIG & STATE
 ================================================ */
-var CFG={speed:5,playerR:.4,exitR:2.8};
+var CFG={speed:5,playerR:.4,exitR:2.8,mouseSens:5};
+var _exitCell=null;
 var pos={x:0,z:0},gameOn=false,won=false,gameRole='solo';
 var exitX=0,exitZ=0;
 var KEYS={};
@@ -1139,7 +1209,8 @@ function createRoom(){
   $('hostCodeBox').textContent=roomCode;$('hostCodeArea').style.display='block';$('btnCreateRoom').style.display='none';
   waitPlayers=[{id:'host',name:playerName,isHost:true}];gameRole='host';
   /* Use PeerJS public cloud with STUN for better crossplay */
-  peer=new Peer('LBY_'+roomCode,{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+  var _iceServers=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'},{urls:'stun:global.stun.twilio.com:3478'}];
+  peer=new Peer('LBY_'+roomCode,{debug:0,host:'0.peerjs.com',port:443,path:'/',secure:true,config:{iceServers:_iceServers}});
   peer.on('open',function(){toast('Sala creada: '+roomCode);});
   peer.on('connection',function(conn){
     conn.on('open',function(){guestConns[conn.peer]=conn;
@@ -1147,38 +1218,39 @@ function createRoom(){
       conn.on('close',function(){delete guestConns[conn.peer];waitPlayers=waitPlayers.filter(function(p){return p.id!==conn.peer;});renderWait();broadcastH({type:'player_leave',id:conn.peer});removeOther(conn.peer);});
     });
   });
-  peer.on('error',function(e){toast('Error de sala: '+e.type,5000);});
+  peer.on('error',function(e){toast('Error al crear sala: '+e.type,5000);});
   setTimeout(function(){$('sMenu').classList.add('hidden');showWait();},400);
 }
 
 function onHostData(conn,d){
-  if(d.type==='join'){waitPlayers.push({id:conn.peer,name:d.name});renderWait();conn.send({type:'welcome',players:waitPlayers,maxPlayers:maxPlayers,seed:_mazeSeed,mazeSize:MAZE_SIZE});broadcastH({type:'player_join',id:conn.peer,name:d.name},conn.peer);toast(d.name+' se uni&oacute;');if(waitPlayers.length>=maxPlayers)hostStartGame();}
+  if(d.type==='join'){waitPlayers.push({id:conn.peer,name:d.name});renderWait();conn.send({type:'welcome',players:waitPlayers,maxPlayers:maxPlayers,seed:_mazeSeed,mazeSize:MAZE_SIZE,gameMode:GAME_MODE});broadcastH({type:'player_join',id:conn.peer,name:d.name},conn.peer);toast(d.name+' se unió');if(waitPlayers.length>=maxPlayers)hostStartGame();}
   if(d.type==='move'&&gameStarted){broadcastH({type:'move',id:conn.peer,pos:d.pos},conn.peer);updateOther(conn.peer,d.pos);}
   if(d.type==='ready'){_readyCount++;checkAllReady();}
   if(d.type==='win'){broadcastH({type:'win',name:d.name});triggerWin(d.name,false);}
 }
 function broadcastH(msg,exc){Object.keys(guestConns).forEach(function(id){if(id!==exc)try{guestConns[id].send(msg);}catch(e){}});}
-function hostStartGame(){$('btnStart').style.display='none';broadcastH({type:'start',mazeSize:MAZE_SIZE,seed:_mazeSeed});launchGame();}
+function hostStartGame(){$('btnStart').style.display='none';broadcastH({type:'start',mazeSize:MAZE_SIZE,seed:_mazeSeed,gameMode:GAME_MODE});launchGame();}
 
 function doJoin(){
   var nm=($('snIn').value||$('nameIn').value||playerName).trim().toUpperCase()||'JUGADOR01';syncName(nm);
   var code=$('jCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(code.length!==6){toast('El c&oacute;digo debe tener exactamente 6 car&aacute;cteres',4000);return;}
+  if(code.length!==6){toast('El código debe tener 6 carácteres',4000);return;}
   roomCode=code;gameRole='guest';
-  peer=new Peer({debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]}});
+  var _iceServers=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}];
+  peer=new Peer({debug:0,host:'0.peerjs.com',port:443,path:'/',secure:true,config:{iceServers:_iceServers}});
   peer.on('open',function(){
     hostConn=peer.connect('LBY_'+code,{reliable:true,serialization:'json'});
     hostConn.on('open',function(){hostConn.send({type:'join',name:playerName});toast('Conectado a sala '+code);$('sMenu').classList.add('hidden');showWait();});
     hostConn.on('data',function(d){onGuestData(d);});
-    hostConn.on('close',function(){if(!gameStarted)toast('Conexi&oacute;n perdida — verifica el c&oacute;digo',4000);});
+    hostConn.on('close',function(){if(!gameStarted)toast('Conexión perdida. Verifica el código',4000);});
   });
   peer.on('error',function(e){toast('No se pudo conectar: '+e.type,5000);});
 }
 function onGuestData(d){
-  if(d.type==='welcome'){waitPlayers=d.players||[];maxPlayers=d.maxPlayers||4;if(d.seed)_mazeSeed=d.seed;if(d.mazeSize)MAZE_SIZE=d.mazeSize;renderWait();}
-  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name});renderWait();toast(d.name+' se uni&oacute;');}
+  if(d.type==='welcome'){waitPlayers=d.players||[];maxPlayers=d.maxPlayers||4;if(d.seed)_mazeSeed=d.seed;if(d.mazeSize)MAZE_SIZE=d.mazeSize;if(d.gameMode)GAME_MODE=d.gameMode;renderWait();}
+  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name});renderWait();toast(d.name+' se unió');}
   if(d.type==='player_leave'){waitPlayers=waitPlayers.filter(function(p){return p.id!==d.id;});renderWait();removeOther(d.id);}
-  if(d.type==='start'){MAZE_SIZE=d.mazeSize||MAZE_SIZE;if(d.seed)_mazeSeed=d.seed;gameStarted=true;launchGame();}
+  if(d.type==='start'){MAZE_SIZE=d.mazeSize||MAZE_SIZE;if(d.seed)_mazeSeed=d.seed;if(d.gameMode)GAME_MODE=d.gameMode;gameStarted=true;launchGame();}
   if(d.type==='move')updateOther(d.id,d.pos);
   if(d.type==='all_ready'){_canMove=true;hideBanner();}
   if(d.type==='win')triggerWin(d.name,false);
@@ -1290,6 +1362,7 @@ function launchGame(){
       if(isMobile){$('vjoy').style.display='block';initVJoy();}
       else showClickOverlay();
       pollGP();
+      if(GAME_MODE==='survival')initNextbot();
     });
   });
 }
@@ -1495,10 +1568,11 @@ function updateOther(id,p){
       width:'0.7',height:'0.18',position:'0 1.96 0',
       material:'color:#050709;emissive:'+col+';emissiveIntensity:.12;transparent:true;opacity:.75;side:double'
     }));
-    e.appendChild(mk('a-text',{
-      value:nm,align:'center',position:'0 1.96 0.01',
-      color:col,width:'2.4',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'
-    }));
+    var ntag=mk('a-entity',{position:'0 2.05 0'});
+    ntag.setAttribute('billboard','');
+    var ntext=mk('a-text',{value:nm,align:'center',color:col,width:'2.6',font:'https://cdn.aframe.io/fonts/Exo2Bold.fnt'});
+    ntag.appendChild(ntext);
+    e.appendChild(ntag);
 
     /* === GLOW LIGHT === */
     e.appendChild(mk('a-entity',{
@@ -1520,6 +1594,100 @@ function removeOther(id){
 /* ================================================
    VIRTUAL JOYSTICK
 ================================================ */
+
+/* ================================================
+   NEXTBOT (SUPERVIVENCIA) - placeholder
+   Sound file: sounds/nextbot_chase.mp3
+================================================ */
+var _nbot={active:false,x:0,z:0,speed:2.2,entity:null,soundCtx:null};
+var _nbotOscGain=null;
+
+function initNextbot(){
+  if(!GAME_MODE==='survival')return;
+  _nbot.active=true;
+  /* Spawn far from players - random corner */
+  var corners=[[1,MC-2],[MR-2,1],[MR-2,MC-2]];
+  var c=corners[Math.floor(Math.random()*corners.length)];
+  var startP=wp(c[0],c[1]);
+  _nbot.x=startP.x;_nbot.z=startP.z;
+  /* Create nextbot entity */
+  var e=document.createElement('a-entity');
+  e.id='nextbot';
+  e.setAttribute('position',_nbot.x+' 0 '+_nbot.z);
+  /* Body: flat image placeholder - replace with your PNG */
+  var body=document.createElement('a-plane');
+  body.setAttribute('width','0.9');body.setAttribute('height','1.8');
+  body.setAttribute('position','0 0.9 0');
+  body.setAttribute('material','color:#cc0000;emissive:#880000;emissiveIntensity:1;side:double');
+  body.setAttribute('billboard','');
+  e.appendChild(body);
+  /* Eyes glow */
+  var eyeL=document.createElement('a-sphere');
+  eyeL.setAttribute('radius','0.07');eyeL.setAttribute('position','-0.15 1.5 0.05');
+  eyeL.setAttribute('material','color:#ffffff;emissive:#ff0000;emissiveIntensity:4');
+  e.appendChild(eyeL);
+  var eyeR=document.createElement('a-sphere');
+  eyeR.setAttribute('radius','0.07');eyeR.setAttribute('position','0.15 1.5 0.05');
+  eyeR.setAttribute('material','color:#ffffff;emissive:#ff0000;emissiveIntensity:4');
+  e.appendChild(eyeR);
+  e.appendChild(document.createElement('a-entity')).setAttribute('light','type:point;color:#ff0000;intensity:1.5;distance:5;decay:2');
+  $('gameScene').appendChild(e);
+  _nbot.entity=e;
+  /* Chase loop sound - generative until real audio provided */
+  startNextbotSound();
+  /* Move loop */
+  setInterval(tickNextbot,80);
+}
+
+function startNextbotSound(){
+  try{
+    var ac=getAC();if(!ac)return;
+    _nbotOscGain=ac.createGain();_nbotOscGain.gain.value=0;
+    _nbotOscGain.connect(ac.destination);
+    var osc=ac.createOscillator();osc.type='sawtooth';osc.frequency.value=80;
+    osc.connect(_nbotOscGain);osc.start();
+    var lfo=ac.createOscillator();lfo.frequency.value=2.5;lfo.type='sine';
+    var lfoG=ac.createGain();lfoG.gain.value=30;
+    lfo.connect(lfoG);lfoG.connect(osc.frequency);lfo.start();
+    _nbotOscGain.gain.linearRampToValueAtTime(0.25,ac.currentTime+1.5);
+  }catch(e){}
+}
+
+function tickNextbot(){
+  if(!_nbot.active||won)return;
+  /* Move toward player */
+  var dx=pos.x-_nbot.x,dz=pos.z-_nbot.z;
+  var dist=Math.sqrt(dx*dx+dz*dz);
+  if(dist<0.001)return;
+  var step=_nbot.speed*(80/1000);
+  var nx=_nbot.x+dx/dist*step,nz=_nbot.z+dz/dist*step;
+  if(!hitWall(nx,nz)){_nbot.x=nx;_nbot.z=nz;}
+  else if(!hitWall(nx,_nbot.z)){_nbot.x=nx;}
+  else if(!hitWall(_nbot.x,nz)){_nbot.z=nz;}
+  if(_nbot.entity)_nbot.entity.setAttribute('position',_nbot.x+' 0 '+_nbot.z);
+  /* Volume based on distance */
+  if(_nbotOscGain){
+    var vol=Math.max(0,Math.min(0.4,1.2/Math.max(dist,1)));
+    _nbotOscGain.gain.value=vol;
+  }
+  /* Catch player */
+  if(dist<0.8){
+    _nbot.active=false;
+    if(!won){won=true;gameOn=false;triggerLoss();}
+  }
+}
+
+function triggerLoss(){
+  var win=$('sWin');
+  if(win){
+    var title=$('winTitle'),sub=$('winSub');
+    if(title){title.textContent='ATRAPADO';title.style.color='var(--c1)';}
+    if(sub)sub.textContent='El nextbot te ha atrapado.';
+    win.style.display='flex';
+  }
+  $('hud').style.display='none';$('vjoy').style.display='none';
+}
+
 function initVJoy(){
   var base=$('vjBase'),stick=$('vjStick');
   var bR=base.offsetWidth/2;
