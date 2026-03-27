@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
-<title>LABYRINTH VR</title>
+<title>LABYRINTH VR - Multijugador Épico</title>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
+/* =============== ESTILOS COMPLETOS (igual que antes) =============== */
 :root{
   --bg:#07090f;--bg2:#0c1020;--bg3:#111828;
   --c0:#00e5ff;--c0a:rgba(0,229,255,.13);
@@ -446,8 +447,10 @@ AFRAME.registerComponent('billboard',{
           <label class="f-label">Tama&ntilde;o del laberinto</label>
           <div class="t-row" id="msRow">
             <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=19;updateMazeSizeDesc()">Normal <span style="font-size:.55rem;opacity:.6">19x19</span></button>
-            <button class="t-btn on" onclick="tE('msRow',this);MAZE_SIZE=29;updateMazeSizeDesc()">Grande <span style="font-size:.55rem;opacity:.6">29x29</span></button>
+            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=29;updateMazeSizeDesc()">Grande <span style="font-size:.55rem;opacity:.6">29x29</span></button>
             <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=39;updateMazeSizeDesc()">Enorme <span style="font-size:.55rem;opacity:.6">39x39</span></button>
+            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=49;updateMazeSizeDesc()">Colosal <span style="font-size:.55rem;opacity:.6">49x49</span></button>
+            <button class="t-btn" onclick="tE('msRow',this);MAZE_SIZE=59;updateMazeSizeDesc()">Titánico <span style="font-size:.55rem;opacity:.6">59x59</span></button>
           </div>
         </div>
         <button class="mode-item" onclick="startSolo()"><span class="mode-ico">&#x25B7;</span><div><span class="mode-title">Solo</span><span class="mode-sub">Explora sin competir</span></div><span class="mode-arr">&#x203A;</span></button>
@@ -646,7 +649,7 @@ if(isMobile){var _cp=$('ctrlDesktop');if(_cp)_cp.style.display='none';var _cm=$(
 /* ================================================
    STATE
 ================================================ */
-var GAME_VERSION='v0.4.1';
+var GAME_VERSION='v0.4.2';
 var GAME_MODE='original'; /* 'original' | 'survival' */
 var _wins=+(localStorage.getItem('lbWins')||0);
 var _equippedHat=localStorage.getItem('lbHat')||'none';
@@ -660,17 +663,22 @@ function updateModeDesc(){
     el.innerHTML='Modo Original: busca la salida antes que los dem&aacute;s. Sin l&iacute;mite de tiempo.';
   }
 }
+function updateMazeSizeDesc(){
+  var sizes={'19':'Normal (19x19)','29':'Grande (29x29)','39':'Enorme (39x39)','49':'Colosal (49x49)','59':'Titánico (59x59)'};
+  var desc=$('modeDesc');
+  if(desc && sizes[MAZE_SIZE]) desc.innerHTML = desc.innerHTML.split('<br>')[0]+'<br>Laberinto: '+sizes[MAZE_SIZE];
+}
 
 /* ================================================
-   SHOP
+   SHOP (cosmetics now functional)
 ================================================ */
 var SHOP_ITEMS=[
-  {id:'hat_basic', name:'Sombrero B&#225;sico',  desc:'Un sombrero clásico encima de la cabeza', type:'hat',   cost:1, color:'#ffcc44'},
-  {id:'hat_wizard',name:'Sombrero de Mago',       desc:'Cónico morado brillante',                type:'hat',   cost:3, color:'#a855f7'},
-  {id:'hat_crown', name:'Corona',                 desc:'Corona dorada de campeón',               type:'hat',   cost:5, color:'#ffd700'},
-  {id:'trail_fire',name:'Estela de Fuego',         desc:'Rastro de llamas al correr',             type:'trail', cost:2, color:'#ff6600'},
-  {id:'trail_ice', name:'Estela de Hielo',         desc:'Cristales azules tras tus pasos',        type:'trail', cost:3, color:'#00e5ff'},
-  {id:'trail_star',name:'Estela Estelar',          desc:'Part&#237;culas doradas al moverte',     type:'trail', cost:4, color:'#ffdd44'}
+  {id:'hat_basic', name:'Sombrero Básico',  desc:'Un sombrero clásico encima de la cabeza', type:'hat',   cost:1, color:'#ffcc44', model:'hat1'},
+  {id:'hat_wizard',name:'Sombrero de Mago',       desc:'Cónico morado brillante',                type:'hat',   cost:3, color:'#a855f7', model:'hat2'},
+  {id:'hat_crown', name:'Corona',                 desc:'Corona dorada de campeón',               type:'hat',   cost:5, color:'#ffd700', model:'hat3'},
+  {id:'trail_fire',name:'Estela de Fuego',         desc:'Rastro de llamas al correr',             type:'trail', cost:2, color:'#ff6600', model:'trail_fire'},
+  {id:'trail_ice', name:'Estela de Hielo',         desc:'Cristales azules tras tus pasos',        type:'trail', cost:3, color:'#00e5ff', model:'trail_ice'},
+  {id:'trail_star',name:'Estela Estelar',          desc:'Part&#237;culas doradas al moverte',     type:'trail', cost:4, color:'#ffdd44', model:'trail_star'}
 ];
 
 function openShop(){
@@ -698,15 +706,32 @@ function openShop(){
         if(it.type==='hat'){_equippedHat=it.id;localStorage.setItem('lbHat',it.id);}
         else{_equippedTrail=it.id;localStorage.setItem('lbTrail',it.id);}
         toast('Cosm&#233;tico equipado: '+it.name);openShop();
+        // Update local player's hat (if in game)
+        if($('gameScene').getAttribute('visible')==='true'){
+          updateLocalCosmetics();
+        }
       };})(item);
     }
     div.appendChild(btn);cont.appendChild(div);
   });
-  /* "En progreso" note */
   var note=document.createElement('div');
   note.style.cssText='margin-top:8px;padding:9px 12px;background:var(--bg2);border:1px solid rgba(255,204,68,.2);border-radius:9px;font-family:var(--fm);font-size:.58rem;color:var(--tx3);line-height:1.7';
-  note.innerHTML='&#x26A0; Tienda en progreso &mdash; pr&#243;ximamente modelos 3D, m&#225;s cosm&#233;ticos, estelas reales y efectos visuales.';
+  note.innerHTML='&#x26A0; Tienda funcional: los sombreros aparecen en la cabeza de tu personaje y los dem&#225;s jugadores los ven. Estelas pr&#243;ximamente.';
   cont.appendChild(note);
+}
+
+function updateLocalCosmetics(){
+  // Remove existing hat from camera rig
+  var existingHat=$('localHat');
+  if(existingHat) existingHat.remove();
+  if(_equippedHat!=='none'){
+    var hatEnt=mk('a-entity',{id:'localHat',position:'0 0.35 0'});
+    // Simple cone for hat
+    hatEnt.appendChild(mk('a-cone',{'radius-bottom':'0.18','radius-top':'0.02',height:'0.2',color:_equippedHat==='hat_basic'?'#8B5A2B':_equippedHat==='hat_wizard'?'#8B5A2B':'#FFD700',material:{roughness:0.4,metalness:0.7}}));
+    if(_equippedHat==='hat_wizard') hatEnt.appendChild(mk('a-cone',{'radius-bottom':'0.14','radius-top':'0.01',height:'0.28',color:'#A855F7',position:'0 0.1 0'}));
+    else if(_equippedHat==='hat_crown') hatEnt.appendChild(mk('a-torus',{'radius':'0.12','radius-tubular':'0.02',color:'#FFD700',position:'0 0.2 0'}));
+    $('cam').appendChild(hatEnt);
+  }
 }
 
 /* ================================================
@@ -1160,6 +1185,10 @@ var exitX=0,exitZ=0;
 var KEYS={};
 var vjoyDX=0,vjoyDZ=0,gpDX=0,gpDZ=0,gpLX=0,gpLY=0;
 var _inVR=false,_hasInput=false,_vrAutoFwd=false;
+var _canMove=false; // Movement disabled until countdown finishes
+var _countdownTimer=null;
+var _countdownRemaining=30;
+var _buildComplete=false;
 
 /* ================================================
    PEER JS — cross-device (mobile + PC)
@@ -1167,7 +1196,7 @@ var _inVR=false,_hasInput=false,_vrAutoFwd=false;
 var peer=null,hostConn=null,guestConns={};
 var roomCode='',maxPlayers=4;
 var waitPlayers=[],gameStarted=false;
-var _readyCount=0,_canMove=false;
+var _readyCount=0;
 
 /* ICE servers: STUN de Google + Cloudflare + TURN público para móvil */
 var _iceServers=[
@@ -1195,7 +1224,7 @@ function createRoom(){
   $('hostCodeBox').textContent=roomCode;
   $('hostCodeArea').style.display='block';
   $('btnCreateRoom').style.display='none';
-  waitPlayers=[{id:'host',name:playerName,isHost:true}];
+  waitPlayers=[{id:'host',name:playerName,isHost:true,hat:_equippedHat}];
   gameRole='host';
 
   try{peer=new Peer('LBY_'+roomCode,_peerOpts);}catch(err){toast('Error PeerJS: '+err.message,6000);return;}
@@ -1221,16 +1250,17 @@ function createRoom(){
 
 function onHostData(conn,d){
   if(d.type==='join'){
-    waitPlayers.push({id:conn.peer,name:d.name});
+    waitPlayers.push({id:conn.peer,name:d.name,hat:d.hat||'none'});
     renderWait();
     conn.send({type:'welcome',players:waitPlayers,maxPlayers:maxPlayers,seed:_mazeSeed,mazeSize:MAZE_SIZE,gameMode:GAME_MODE});
-    broadcastH({type:'player_join',id:conn.peer,name:d.name},conn.peer);
+    broadcastH({type:'player_join',id:conn.peer,name:d.name,hat:d.hat},conn.peer);
     toast(d.name+' se uni\u00f3');
     if(waitPlayers.length>=maxPlayers)hostStartGame();
   }
   if(d.type==='move'&&gameStarted){broadcastH({type:'move',id:conn.peer,pos:d.pos},conn.peer);updateOther(conn.peer,d.pos);}
   if(d.type==='ready'){_readyCount++;checkAllReady();}
   if(d.type==='win'){broadcastH({type:'win',name:d.name});triggerWin(d.name,false);}
+  if(d.type==='death'){broadcastH({type:'death',id:conn.peer});}
 }
 function broadcastH(msg,exc){Object.keys(guestConns).forEach(function(id){if(id!==exc)try{guestConns[id].send(msg);}catch(e){}});}
 function hostStartGame(){
@@ -1255,7 +1285,7 @@ function doJoin(){
       },8000);
       hostConn.on('open',function(){
         clearTimeout(_timeout);
-        hostConn.send({type:'join',name:playerName});
+        hostConn.send({type:'join',name:playerName,hat:_equippedHat});
         toast('Conectado a sala '+code);
         $('sMenu').classList.add('hidden');showWait();
       });
@@ -1278,7 +1308,7 @@ function onGuestData(d){
     if(d.gameMode)GAME_MODE=d.gameMode;
     renderWait();
   }
-  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name});renderWait();toast(d.name+' se uni\u00f3');}
+  if(d.type==='player_join'){waitPlayers.push({id:d.id,name:d.name,hat:d.hat||'none'});renderWait();toast(d.name+' se uni\u00f3');}
   if(d.type==='player_leave'){waitPlayers=waitPlayers.filter(function(p){return p.id!==d.id;});renderWait();removeOther(d.id);}
   if(d.type==='start'){
     MAZE_SIZE=d.mazeSize||MAZE_SIZE;
@@ -1289,6 +1319,7 @@ function onGuestData(d){
   if(d.type==='move')updateOther(d.id,d.pos);
   if(d.type==='all_ready'){_canMove=true;hideBanner();}
   if(d.type==='win')triggerWin(d.name,false);
+  if(d.type==='death'){if(d.id===hostConn.peer)toast('El anfitri\u00f3n ha sido atrapado',3000); else toast('Un jugador ha sido atrapado',3000);}
 }
 
 function showWait(){
@@ -1359,7 +1390,7 @@ function finishVR(){
 }
 
 /* ================================================
-   BUILD SCREEN
+   BUILD SCREEN (durante la cuenta atrás)
 ================================================ */
 function showBuildScreen(finalCb){
   /* Rebuild maze with current seed and size */
@@ -1396,7 +1427,8 @@ function showBuildScreen(finalCb){
 ================================================ */
 function startSolo(){
   var nm=($('snIn').value||$('nameIn').value||playerName).trim().toUpperCase()||'JUGADOR01';
-  syncName(nm);gameRole='solo';_canMove=true;_mazeSeed=0;/* new seed each solo game */
+  syncName(nm);gameRole='solo';_canMove=false; /* will be set after countdown */
+  _mazeSeed=0; /* new seed each solo game */
   launchGame();
 }
 
@@ -1436,15 +1468,36 @@ function launchGame(){
     $('menuScene').setAttribute('visible','false');
     $('gameScene').setAttribute('visible','true');
     setFog(true);
+    updateLocalCosmetics();
 
-    /* showVRCountdown solo actua si _inVR=true, sino llama cb de inmediato */
-    showVRCountdown(function(){
-      gameOn=true;_gameStartTime=Date.now();
-      if(isMobile){if($('vjoy'))$('vjoy').style.display='block';initVJoy();}
-      else showClickOverlay();
-      pollGP();
-      if(GAME_MODE==='survival')initNextbot();
-    });
+    /* Mostrar pantalla de carga con cuenta atrás de 30 segundos durante el cual no se puede mover */
+    _canMove=false;
+    _countdownRemaining=30;
+    var countdownEl=document.createElement('div');
+    countdownEl.id='countdownOverlay';
+    countdownEl.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;font-family:var(--fn);backdrop-filter:blur(8px);';
+    countdownEl.innerHTML='<div style="font-size:clamp(1.8rem,6vw,3.2rem);font-weight:900;color:var(--c0);text-shadow:0 0 20px var(--c0);animation:shimmer 2s infinite">CARGANDO</div>'
+      +'<div style="font-size:clamp(4rem,12vw,6rem);font-weight:900;color:var(--tx);" id="cdNum">30</div>'
+      +'<div style="font-family:var(--fm);font-size:.8rem;color:var(--tx3);letter-spacing:.2em">PREPARANDO LABERINTO</div>'
+      +'<div class="vr-prog" style="width:200px"><div class="vr-prog-fill" id="cdFill" style="width:0%"></div></div>';
+    document.body.appendChild(countdownEl);
+    var cdInterval=setInterval(function(){
+      if(_countdownRemaining<=0){
+        clearInterval(cdInterval);
+        countdownEl.remove();
+        _canMove=true;
+        gameOn=true;
+        _gameStartTime=Date.now();
+        if(isMobile){if($('vjoy'))$('vjoy').style.display='block';initVJoy();}
+        else showClickOverlay();
+        pollGP();
+        if(GAME_MODE==='survival')initNextbot();
+      } else {
+        _countdownRemaining--;
+        var cdNum=$('cdNum');if(cdNum)cdNum.textContent=_countdownRemaining;
+        var cdFill=$('cdFill');if(cdFill)cdFill.style.width=((30-_countdownRemaining)/30*100)+'%';
+      }
+    },1000);
   });
 }
 
@@ -1519,7 +1572,7 @@ var _lt=0,_moving=false;
 })(0);
 
 function movePlayer(dt){
-  /* Solo mode: _canMove siempre true. Multi: espera all_ready */
+  /* Solo mode: _canMove siempre true. Multi: espera all_ready y countdown */
   if(!_canMove)return;
   var dx=0,dz=0;
   if(KEYS['w']||KEYS['arrowup'])dz=-1;
@@ -1652,6 +1705,16 @@ function updateOther(id,p){
     e.appendChild(ntag);
     /* Glow */
     e.appendChild(mk('a-entity',{light:'type:point;color:'+col+';intensity:.3;distance:2;decay:3'}));
+    /* Hat if equipped */
+    var hatId=null;
+    for(var j=0;j<waitPlayers.length;j++){if(waitPlayers[j].id===id){hatId=waitPlayers[j].hat;break;}}
+    if(hatId && hatId!=='none'){
+      var hatEnt=mk('a-entity',{position:'0 1.75 0'});
+      hatEnt.appendChild(mk('a-cone',{'radius-bottom':'0.18','radius-top':'0.02',height:'0.2',color:hatId==='hat_basic'?'#8B5A2B':hatId==='hat_wizard'?'#8B5A2B':'#FFD700',material:{roughness:0.4,metalness:0.7}}));
+      if(hatId==='hat_wizard') hatEnt.appendChild(mk('a-cone',{'radius-bottom':'0.14','radius-top':'0.01',height:'0.28',color:'#A855F7',position:'0 0.1 0'}));
+      else if(hatId==='hat_crown') hatEnt.appendChild(mk('a-torus',{'radius':'0.12','radius-tubular':'0.02',color:'#FFD700',position:'0 0.2 0'}));
+      e.appendChild(hatEnt);
+    }
     $('otherPlayers').appendChild(e);
     _others[id]=e;
   }
@@ -1660,6 +1723,14 @@ function updateOther(id,p){
   if(p.yaw!==undefined){
     var hEl=document.getElementById('plrHead_'+id);
     if(hEl){var deg=(p.yaw*180/Math.PI);hEl.setAttribute('rotation','0 '+deg.toFixed(1)+' 0');}
+  }
+  /* Pequeño balanceo al moverse (simula pasos) */
+  if(_othersPos[id] && (Math.abs(p.x - _othersPos[id].x)>0.02 || Math.abs(p.z - _othersPos[id].z)>0.02)){
+    var body=_others[id].querySelector('[position="0 1.1 0"]');
+    if(body){
+      var bounce=Math.sin(Date.now()*0.015)*0.02;
+      body.setAttribute('position','0 '+(1.1+bounce)+' 0');
+    }
   }
 }
 function removeOther(id){
@@ -1671,11 +1742,9 @@ function removeOther(id){
 
 /* ================================================
    NEXTBOT — Modo Supervivencia
-   Sustituir imagen: assets/nextbot.png (billboard)
-   Sonido loop: assets/nextbot_chase.mp3
-   Cuando atrapa a alguien, reaparece en punto random
+   Persigue a todos los jugadores, atrapa y reaparece tras 8s
 ================================================ */
-var _nbot={active:false,x:0,z:0,speed:2.6,entity:null,iv:null};
+var _nbot={active:false,x:0,z:0,speed:3.2,entity:null,iv:null};
 var _nbotGain=null;
 
 function initNextbot(){
@@ -1764,27 +1833,22 @@ function tickNextbot(){
   /* Atrapa jugador */
   if(dist<0.9&&gameOn){
     gameOn=false;
-    /* En multijugador, el nextbot reaparece y sigue */
-    if(gameRole==='solo'||waitPlayers.length<=1){
-      _nbot.active=false;won=true;triggerLoss();
-    }else{
-      /* Multijugador: aparece de nuevo, notificar */
-      toast('\u00a1Te ha atrapado el nextbot!',3000);
-      setTimeout(spawnNextbotRandom,1500);
+    /* Notificar al host (si es multijugador) */
+    if(gameRole==='guest'&&hostConn&&hostConn.open)try{hostConn.send({type:'death',id:hostConn.peer});}catch(e){}
+    if(gameRole==='host')broadcastH({type:'death',id:'host'});
+    /* Respawneo del jugador tras 2 segundos */
+    setTimeout(function(){
+      var sp=wp(5,5);
+      pos.x=sp.x;pos.z=sp.z;
+      $('rig').setAttribute('position',pos.x+' 0 '+pos.z);
       gameOn=true;
+      toast('\u00a1Te ha atrapado el nextbot! Regresas al inicio.',3000);
+    },2000);
+    /* El nextbot se teletransporta aleatoriamente tras 8 segundos */
+    if(_nbot.active){
+      setTimeout(spawnNextbotRandom,8000);
     }
   }
-}
-
-function triggerLoss(){
-  if($('sWin').style.display==='flex')return;
-  stopNextbot();
-  var title=$('winTitle'),sub=$('winSub');
-  if(title){title.textContent='ATRAPADO';title.style.color='var(--c1)';}
-  if(sub)sub.innerHTML='El nextbot te ha atrapado.<br><span style="font-size:.58rem;color:var(--tx3)">Modo supervivencia</span>';
-  $('sWin').style.display='flex';
-  if($('hud'))$('hud').style.display='none';
-  if($('vjoy'))$('vjoy').style.display='none';
 }
 
 /* ================================================
